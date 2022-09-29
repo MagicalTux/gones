@@ -28,19 +28,23 @@ func ldxImmed(cpu *Cpu2A03) {
 func ldxZero(cpu *Cpu2A03) {
 	addr := uint16(cpu.ReadPC())
 	cpu.X = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.X)
 }
 
 func ldxZeroY(cpu *Cpu2A03) {
 	addr := uint16(cpu.ReadPC() + cpu.Y)
 	cpu.X = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.X)
 }
 
 func ldxAbs(cpu *Cpu2A03) {
 	addr := cpu.ReadPC16()
 	cpu.X = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.X)
 }
 
 func ldxAbsY(cpu *Cpu2A03) {
 	addr := cpu.ReadPC16() + uint16(cpu.Y)
 	cpu.X = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.X)
 }

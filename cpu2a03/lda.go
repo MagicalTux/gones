@@ -29,31 +29,37 @@ func init() {
 
 func ldaImmed(cpu *Cpu2A03) {
 	cpu.A = cpu.ReadPC()
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaZero(cpu *Cpu2A03) {
 	addr := uint16(cpu.ReadPC())
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaZeroX(cpu *Cpu2A03) {
 	addr := uint16(cpu.ReadPC() + cpu.X)
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaAbs(cpu *Cpu2A03) {
 	addr := cpu.ReadPC16()
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaAbsX(cpu *Cpu2A03) {
 	addr := cpu.ReadPC16() + uint16(cpu.X)
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaAbsY(cpu *Cpu2A03) {
 	addr := cpu.ReadPC16() + uint16(cpu.Y)
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaIndX(cpu *Cpu2A03) {
@@ -61,6 +67,7 @@ func ldaIndX(cpu *Cpu2A03) {
 	addr := uint16(cpu.ReadPC()) + uint16(cpu.X)
 	addr = cpu.Read16(addr)
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }
 
 func ldaIndY(cpu *Cpu2A03) {
@@ -68,4 +75,5 @@ func ldaIndY(cpu *Cpu2A03) {
 	addr := uint16(cpu.ReadPC())
 	addr = cpu.Read16(addr) + uint16(cpu.Y)
 	cpu.A = cpu.Memory.MemRead(addr)
+	cpu.flagsNZ(cpu.A)
 }

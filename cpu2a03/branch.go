@@ -13,7 +13,6 @@ BEQ (Branch on EQual)          $F0
 */
 
 func init() {
-	cpu2a03op[0x10] = bpl
 	cpu2a03op[0x30] = bmi
 	cpu2a03op[0x50] = bvc
 	cpu2a03op[0x70] = bvs

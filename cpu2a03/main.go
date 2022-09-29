@@ -7,12 +7,6 @@ import (
 	"github.com/MagicalTux/gones/memory"
 )
 
-type op2a03 func(cpu *Cpu2A03)
-
-var (
-	cpu2a03op [256]op2a03
-)
-
 type Cpu2A03 struct {
 	A    byte   // accumulator
 	X, Y byte   // registers
@@ -85,6 +79,14 @@ func (cpu *Cpu2A03) ReadPC16() uint16 {
 	return v
 }
 
+func (cpu *Cpu2A03) PeekPC() uint8 {
+	return cpu.Memory.MemRead(cpu.PC)
+}
+
+func (cpu *Cpu2A03) PeekPC16() uint16 {
+	return cpu.Read16(cpu.PC)
+}
+
 func (cpu *Cpu2A03) Push(v byte) {
 	cpu.Memory.MemWrite(0x100+uint16(cpu.S), v)
 	cpu.S -= 1
@@ -94,6 +96,20 @@ func (cpu *Cpu2A03) Pull() byte {
 	cpu.S += 1
 	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
 	return v
+}
+
+func (cpu *Cpu2A03) flagsNZ(v byte) {
+	// set flags N & Z based on value v
+	if v == 0 {
+		cpu.P |= FlagZero
+	} else {
+		cpu.P &= ^FlagZero
+	}
+	if v&0x80 == 0x80 {
+		cpu.P |= FlagNegative
+	} else {
+		cpu.P &= ^FlagNegative
+	}
 }
 
 func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
