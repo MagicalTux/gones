@@ -6,12 +6,13 @@ import (
 	"os"
 
 	"github.com/MagicalTux/gones/cartridge"
+	"github.com/MagicalTux/gones/cpu2a03"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Game struct {
-	cpu *Cpu2A03
+	cpu *cpu2a03.Cpu2A03
 }
 
 func (g *Game) Update() error {
@@ -40,7 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cpu := New2A03()
+	cpu := cpu2a03.New()
 
 	err = data.Mapper.Setup(cpu.Memory)
 	if err != nil {

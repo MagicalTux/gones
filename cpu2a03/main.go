@@ -1,10 +1,16 @@
-package main
+package cpu2a03
 
 import (
 	"fmt"
 	"log"
 
 	"github.com/MagicalTux/gones/memory"
+)
+
+type op2a03 func(cpu *Cpu2A03)
+
+var (
+	cpu2a03op [256]op2a03
 )
 
 type Cpu2A03 struct {
@@ -17,9 +23,10 @@ type Cpu2A03 struct {
 	Memory memory.Master
 	PPU    *PPU
 	APU    *APU
+	fault  bool
 }
 
-func New2A03() *Cpu2A03 {
+func New() *Cpu2A03 {
 	cpu := &Cpu2A03{
 		Memory: memory.NewBus(),
 		PPU:    &PPU{},
@@ -36,9 +43,18 @@ func New2A03() *Cpu2A03 {
 }
 
 func (cpu *Cpu2A03) Step() {
+	if cpu.fault {
+		return
+	}
 	// read value at PC
 	e := cpu.Memory.MemRead(cpu.PC)
-	log.Printf("CPU Step: $%02x", e)
+	f := cpu2a03op[e]
+	log.Printf("CPU Step: $%02x f=%v", e, f)
+	if f == nil {
+		log.Printf("FATAL CPU ERROR - unsupported operand")
+		cpu.fault = true
+		return
+	}
 }
 
 func (cpu *Cpu2A03) Reset() {
