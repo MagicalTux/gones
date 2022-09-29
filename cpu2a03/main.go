@@ -42,15 +42,15 @@ func (cpu *Cpu2A03) Step() {
 	}
 	// read value at PC
 	e := cpu.ReadPC()
-	f := cpu2a03op[e]
-	log.Printf("CPU Step: $%02x f=%v", e, f)
-	if f == nil {
+	o := cpu2a03op[e]
+	log.Printf("CPU Step: $%02x o=%v", e, o)
+	if o == nil || o.f == nil {
 		log.Printf("FATAL CPU ERROR - unsupported op $%02x", e)
 		cpu.fault = true
 		return
 	}
 
-	f(cpu)
+	o.f(cpu, o.am)
 }
 
 func (cpu *Cpu2A03) Reset() {
@@ -95,6 +95,19 @@ func (cpu *Cpu2A03) Push(v byte) {
 func (cpu *Cpu2A03) Pull() byte {
 	cpu.S += 1
 	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
+	return v
+}
+
+func (cpu *Cpu2A03) Push16(v uint16) {
+	// TODO is this the right order?
+	cpu.Push(uint8(v & 0xff))
+	cpu.Push(uint8((v >> 8) & 0xff))
+}
+
+func (cpu *Cpu2A03) Pull16() uint16 {
+	var v uint16
+	v = uint16(cpu.Pull())
+	v |= uint16(cpu.Pull()) << 8
 	return v
 }
 

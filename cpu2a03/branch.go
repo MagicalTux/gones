@@ -12,92 +12,58 @@ BNE (Branch on Not Equal)      $D0
 BEQ (Branch on EQual)          $F0
 */
 
-func init() {
-	cpu2a03op[0x30] = bmi
-	cpu2a03op[0x50] = bvc
-	cpu2a03op[0x70] = bvs
-	cpu2a03op[0x90] = bcc
-	cpu2a03op[0xb0] = bcs
-	cpu2a03op[0xd0] = bne
-	cpu2a03op[0xf0] = beq
-}
-
-func bpl(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bpl(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagNegative == 0 {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func bmi(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bmi(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagNegative == FlagNegative {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func bvc(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bvc(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagOverflow == 0 {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func bvs(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bvs(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagOverflow == FlagOverflow {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func bcc(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bcc(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagCarry == 0 {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func bcs(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bcs(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagCarry == FlagCarry {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func bne(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func bne(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagZero == 0 {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }
 
-func beq(cpu *Cpu2A03) {
-	offt := uint16(cpu.ReadPC())
+func beq(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
 	if cpu.P&FlagZero == FlagZero {
-		if offt&0x80 == 0x80 {
-			offt |= 0xff00
-		}
-		cpu.PC += offt
+		cpu.PC = addr
 	}
 }

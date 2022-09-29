@@ -12,36 +12,28 @@ PHP (PusH Processor status)     $08  3
 PLP (PuLl Processor status)     $28  4
 */
 
-func init() {
-	cpu2a03op[0x9a] = txs
-	cpu2a03op[0xba] = tsx
-	cpu2a03op[0x48] = pha
-	cpu2a03op[0x68] = pla
-	cpu2a03op[0x08] = php
-	cpu2a03op[0x28] = plp
-}
-
-func txs(cpu *Cpu2A03) {
+func txs(cpu *Cpu2A03, am AddressMode) {
 	// typically, programs will start with "TXS $FF" to reset the stack
+	// am == amImpl
 	cpu.S = cpu.X
 }
 
-func tsx(cpu *Cpu2A03) {
+func tsx(cpu *Cpu2A03, am AddressMode) {
 	cpu.X = cpu.S
 }
 
-func pha(cpu *Cpu2A03) {
+func pha(cpu *Cpu2A03, am AddressMode) {
 	cpu.Push(cpu.A)
 }
 
-func pla(cpu *Cpu2A03) {
+func pla(cpu *Cpu2A03, am AddressMode) {
 	cpu.A = cpu.Pull()
 }
 
-func php(cpu *Cpu2A03) {
+func php(cpu *Cpu2A03, am AddressMode) {
 	cpu.Push(cpu.P)
 }
 
-func plp(cpu *Cpu2A03) {
+func plp(cpu *Cpu2A03, am AddressMode) {
 	cpu.P = cpu.Pull()
 }

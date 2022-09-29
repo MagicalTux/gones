@@ -1,12 +1,9 @@
 package cpu2a03
 
-import "log"
-
-func oraAbs(cpu *Cpu2A03) {
+func ora(cpu *Cpu2A03, am AddressMode) {
 	// Affects Flags: N Z
-	addr := cpu.ReadPC16()
-	v := cpu.Memory.MemRead(addr)
+	v := am.Read(cpu)
 
 	cpu.A |= v
-	log.Printf("ORA $%04x", v)
+	cpu.flagsNZ(cpu.A)
 }

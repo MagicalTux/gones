@@ -13,38 +13,6 @@ Absolute,Y    LDX $4400,Y   $BE  3   4+
 + add 1 cycle if page boundary crossed
 */
 
-func init() {
-	cpu2a03op[0xa2] = ldxImmed
-	cpu2a03op[0xa6] = ldxZero
-	cpu2a03op[0xb6] = ldxZeroY
-	cpu2a03op[0xae] = ldxAbs
-	cpu2a03op[0xbe] = ldxAbsY
-}
-
-func ldxImmed(cpu *Cpu2A03) {
-	cpu.X = cpu.ReadPC()
-}
-
-func ldxZero(cpu *Cpu2A03) {
-	addr := uint16(cpu.ReadPC())
-	cpu.X = cpu.Memory.MemRead(addr)
-	cpu.flagsNZ(cpu.X)
-}
-
-func ldxZeroY(cpu *Cpu2A03) {
-	addr := uint16(cpu.ReadPC() + cpu.Y)
-	cpu.X = cpu.Memory.MemRead(addr)
-	cpu.flagsNZ(cpu.X)
-}
-
-func ldxAbs(cpu *Cpu2A03) {
-	addr := cpu.ReadPC16()
-	cpu.X = cpu.Memory.MemRead(addr)
-	cpu.flagsNZ(cpu.X)
-}
-
-func ldxAbsY(cpu *Cpu2A03) {
-	addr := cpu.ReadPC16() + uint16(cpu.Y)
-	cpu.X = cpu.Memory.MemRead(addr)
-	cpu.flagsNZ(cpu.X)
+func ldx(cpu *Cpu2A03, am AddressMode) {
+	cpu.X = am.Read(cpu)
 }
