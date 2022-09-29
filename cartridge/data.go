@@ -31,7 +31,7 @@ func (d *Data) Close() error {
 func (d *Data) PRG() []byte {
 	// get PRG data
 	// see: https://www.nesdev.org/wiki/INES#iNES_file_format
-	offt := 16
+	offt := 15
 	if d.hasTrainer {
 		offt += 512
 	}
@@ -47,7 +47,7 @@ func (d *Data) CHR() []byte {
 	}
 
 	// get CHR data
-	offt := 16
+	offt := 15
 	if d.hasTrainer {
 		offt += 512
 	}

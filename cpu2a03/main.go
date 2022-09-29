@@ -47,7 +47,7 @@ func (cpu *Cpu2A03) Step() {
 		return
 	}
 	// read value at PC
-	e := cpu.Memory.MemRead(cpu.PC)
+	e := cpu.ReadPC()
 	f := cpu2a03op[e]
 	log.Printf("CPU Step: $%02x f=%v", e, f)
 	if f == nil {
@@ -55,6 +55,8 @@ func (cpu *Cpu2A03) Step() {
 		cpu.fault = true
 		return
 	}
+
+	f(cpu)
 }
 
 func (cpu *Cpu2A03) Reset() {
@@ -67,8 +69,21 @@ func (cpu *Cpu2A03) Reset() {
 
 	// $FFFC-$FFFD = Reset vector
 	cpu.PC = cpu.Read16(0xfffc)
+	cpu.Read16(0x8000)
 
 	log.Printf("CPU reset, new state = %s", cpu)
+}
+
+func (cpu *Cpu2A03) ReadPC() uint8 {
+	v := cpu.Memory.MemRead(cpu.PC)
+	cpu.PC += 1
+	return v
+}
+
+func (cpu *Cpu2A03) ReadPC16() uint16 {
+	v := cpu.Read16(cpu.PC)
+	cpu.PC += 2
+	return v
 }
 
 func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
@@ -76,9 +91,12 @@ func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
 	a := cpu.Memory.MemRead(offt)
 	b := cpu.Memory.MemRead(offt + 1)
 
+	log.Printf("at %04x = $%02x", offt, a)
+	log.Printf("at %04x = $%02x", offt+1, b)
+
 	return uint16(a) | uint16(b)<<8
 }
 
 func (cpu *Cpu2A03) String() string {
-	return fmt.Sprintf("2A03 [A=%02x X=%02x Y=%02x PC=%04x S=%02x P=%02x]", cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.S, cpu.P)
+	return fmt.Sprintf("CPU:2A03 [A=%02x X=%02x Y=%02x PC=%04x S=%02x P=%02x]", cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.S, cpu.P)
 }
