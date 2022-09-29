@@ -117,7 +117,7 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 	case amAbsY:
 		return fmt.Sprintf("abs,Y = $%04x,$%02x", cpu.PeekPC16(), cpu.Y)
 	case amImmed:
-		return fmt.Sprintf("$%04x", cpu.PeekPC16())
+		return fmt.Sprintf("#$%02x", cpu.PeekPC())
 	case amImpl:
 		return "impl"
 	case amInd:

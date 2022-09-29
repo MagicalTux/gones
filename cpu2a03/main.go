@@ -40,16 +40,17 @@ func (cpu *Cpu2A03) Step() {
 	if cpu.fault {
 		return
 	}
+	pos := cpu.PC
 	// read value at PC
 	e := cpu.ReadPC()
 	o := cpu2a03op[e]
 	if o == nil || o.f == nil {
-		log.Printf("FATAL CPU ERROR - unsupported op $%02x at $%04x", e, cpu.PC-1)
+		log.Printf("FATAL CPU ERROR - unsupported op $%02x @ $%04x / %s", e, pos, cpu)
 		cpu.fault = true
 		return
 	}
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
-	log.Printf("CPU Step: %s %s", o.i, o.am.Debug(cpu))
+	log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
 
 	o.f(cpu, o.am)
 }
