@@ -1,8 +1,11 @@
 package main
 
 import (
+	"flag"
 	"log"
+	"os"
 
+	"github.com/MagicalTux/gones/cartridge"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
@@ -18,13 +21,29 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 320, 240
+	return 256, 240
 }
 
 func main() {
-	ebiten.SetWindowSize(640, 480)
-	ebiten.SetWindowTitle("Hello, World!")
-	if err := ebiten.RunGame(&Game{}); err != nil {
+	flag.Parse()
+	arg := flag.Args()
+	if len(arg) != 1 {
+		log.Printf("Usage: %s file.nes", os.Args[0])
+		os.Exit(1)
+	}
+
+	data, err := cartridge.Load(arg[0])
+	if err != nil {
+		log.Printf("Failed to load %s: %s", arg[0], err)
+	}
+	_ = data
+
+	ebiten.SetWindowSize(256*2, 240*2)
+	ebiten.SetWindowTitle("goNES")
+
+	game := &Game{}
+
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
