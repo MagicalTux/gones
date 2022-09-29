@@ -14,3 +14,15 @@ func ldy(cpu *Cpu2A03, am AddressMode) {
 	cpu.Y = am.Read(cpu)
 	cpu.flagsNZ(cpu.Y)
 }
+
+func sta(cpu *Cpu2A03, am AddressMode) {
+	am.Write(cpu, cpu.A)
+}
+
+func stx(cpu *Cpu2A03, am AddressMode) {
+	am.Write(cpu, cpu.X)
+}
+
+func sty(cpu *Cpu2A03, am AddressMode) {
+	am.Write(cpu, cpu.Y)
+}
