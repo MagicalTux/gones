@@ -42,5 +42,10 @@ func Load(fn string) (*Data, error) {
 
 	log.Printf("Mapped %d bytes in memory", ln)
 
+	if err = res.parse(); err != nil {
+		res.Close()
+		return nil, err
+	}
+
 	return res, nil
 }
