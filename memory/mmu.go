@@ -1,5 +1,7 @@
 package memory
 
+import "unsafe"
+
 // A page size of 0x100 means 256 pages for the whole 16bit system
 const (
 	PageBits   = 8
@@ -78,4 +80,8 @@ func (m *MMU) MemWrite(offset uint16, val byte) byte {
 	}
 	// page fault
 	return 0
+}
+
+func (m *MMU) Ptr() uintptr {
+	return uintptr(unsafe.Pointer(m))
 }

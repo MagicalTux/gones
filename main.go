@@ -35,8 +35,18 @@ func main() {
 	data, err := cartridge.Load(arg[0])
 	if err != nil {
 		log.Printf("Failed to load %s: %s", arg[0], err)
+		os.Exit(1)
 	}
-	_ = data
+
+	cpu := New2A03()
+
+	err = data.Mapper.Setup(cpu.Memory)
+	if err != nil {
+		log.Printf("Failed to map %s: %s", arg[0], err)
+		os.Exit(1)
+	}
+
+	log.Printf("CPU ready with memory: %s", cpu.Memory)
 
 	ebiten.SetWindowSize(256*2, 240*2)
 	ebiten.SetWindowTitle("goNES")

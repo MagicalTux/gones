@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-
-	"github.com/MagicalTux/gones/memory"
 )
 
 const (
@@ -57,19 +55,10 @@ func (d *Data) parse() error {
 	log.Printf("Parsed iNes1 file, %d*16kB PRG, %d*8kB CHR, %d*8kB PRG RAM, mapper=%d, trainer=%v", d.numPRG, d.numCHR, d.numPRGram, d.mapperType, d.hasTrainer)
 
 	if f, ok := mappers[d.mapperType]; ok {
-		d.mapper = f()
+		d.Mapper = f(d)
 	} else {
 		return fmt.Errorf("unsupported mapper %d", d.mapperType)
 	}
 
-	if err := d.mapper.init(d); err != nil {
-		return err
-	}
-
 	return nil
-}
-
-func (d *Data) MapTo(m *memory.MMU) error {
-	// Map the cartridge data into the MMU
-	return d.mapper.setup(m)
 }

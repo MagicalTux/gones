@@ -17,7 +17,7 @@ type Cpu2A03 struct {
 func New2A03() *Cpu2A03 {
 	cpu := &Cpu2A03{}
 
-	cpu.Memory = memory.NewMMU()
+	cpu.Memory = memory.NewBus()
 
 	// setup RAM (2kB=0x800 bytes) with its mirrors
 	cpu.Memory.MapHandler(0x0000, 0x2000, memory.NewRAM(0x800))

@@ -5,12 +5,11 @@ import "github.com/MagicalTux/gones/memory"
 type MapperType byte
 
 type Mapper interface {
-	init(d *Data) error
-	setup(m *memory.MMU) error
+	Setup(m memory.Master) error
 }
 
-var mappers = make(map[MapperType]func() Mapper)
+var mappers = make(map[MapperType]func(*Data) Mapper)
 
-const (
-	NROM MapperType = 0x00 // Nintendo cartridge boards NES-NROM-128, NES-NROM-256, their HVC counterparts, and clone boards
-)
+func RegisterMapper(mt MapperType, f func(*Data) Mapper) {
+	mappers[mt] = f
+}
