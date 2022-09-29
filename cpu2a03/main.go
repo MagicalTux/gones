@@ -51,7 +51,7 @@ func (cpu *Cpu2A03) Step() {
 	f := cpu2a03op[e]
 	log.Printf("CPU Step: $%02x f=%v", e, f)
 	if f == nil {
-		log.Printf("FATAL CPU ERROR - unsupported operand")
+		log.Printf("FATAL CPU ERROR - unsupported op $%02x", e)
 		cpu.fault = true
 		return
 	}
@@ -69,7 +69,6 @@ func (cpu *Cpu2A03) Reset() {
 
 	// $FFFC-$FFFD = Reset vector
 	cpu.PC = cpu.Read16(0xfffc)
-	cpu.Read16(0x8000)
 
 	log.Printf("CPU reset, new state = %s", cpu)
 }
@@ -86,13 +85,21 @@ func (cpu *Cpu2A03) ReadPC16() uint16 {
 	return v
 }
 
+func (cpu *Cpu2A03) Push(v byte) {
+	cpu.Memory.MemWrite(0x100+uint16(cpu.S), v)
+	cpu.S -= 1
+}
+
+func (cpu *Cpu2A03) Pull() byte {
+	cpu.S += 1
+	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
+	return v
+}
+
 func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
 	// little endian read
 	a := cpu.Memory.MemRead(offt)
 	b := cpu.Memory.MemRead(offt + 1)
-
-	log.Printf("at %04x = $%02x", offt, a)
-	log.Printf("at %04x = $%02x", offt+1, b)
 
 	return uint16(a) | uint16(b)<<8
 }
