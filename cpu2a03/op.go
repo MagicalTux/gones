@@ -200,7 +200,7 @@ var cpu2a03op = [256]*op{
 	// 0x98
 	nil,
 	nil,
-	nil,
+	&op{"TXS", txs, amImpl},
 	nil,
 	nil,
 	nil,
@@ -208,9 +208,9 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0xa0
+	&op{"LDY", ldy, amImmed},
 	nil,
-	nil,
-	nil,
+	&op{"LDX", ldx, amImmed},
 	nil,
 	nil,
 	nil,
@@ -223,12 +223,12 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	nil,
-	nil,
+	&op{"LDA", lda, amAbs},
 	nil,
 	nil,
 
 	// 0xb0
-	nil,
+	&op{"BCS", bcs, amRel},
 	nil,
 	nil,
 	nil,
@@ -243,7 +243,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	nil,
-	nil,
+	&op{"LDA", lda, amAbsX},
 	nil,
 	nil,
 
@@ -259,8 +259,8 @@ var cpu2a03op = [256]*op{
 
 	// 0xc8
 	nil,
-	nil,
-	nil,
+	&op{"CMP", cmp, amImmed},
+	&op{"DEX", dex, amImpl},
 	nil,
 	nil,
 	nil,

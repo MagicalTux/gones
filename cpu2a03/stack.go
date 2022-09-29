@@ -14,26 +14,31 @@ PLP (PuLl Processor status)     $28  4
 
 func txs(cpu *Cpu2A03, am AddressMode) {
 	// typically, programs will start with "TXS $FF" to reset the stack
-	// am == amImpl
+	am.Implied(cpu)
 	cpu.S = cpu.X
 }
 
 func tsx(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.X = cpu.S
 }
 
 func pha(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.Push(cpu.A)
 }
 
 func pla(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.A = cpu.Pull()
 }
 
 func php(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.Push(cpu.P)
 }
 
 func plp(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P = cpu.Pull()
 }

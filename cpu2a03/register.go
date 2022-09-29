@@ -26,3 +26,10 @@ func stx(cpu *Cpu2A03, am AddressMode) {
 func sty(cpu *Cpu2A03, am AddressMode) {
 	am.Write(cpu, cpu.Y)
 }
+
+func dex(cpu *Cpu2A03, am AddressMode) {
+	// X - 1 -> X
+	am.Implied(cpu)
+	cpu.X -= 1
+	cpu.flagsNZ(cpu.X)
+}

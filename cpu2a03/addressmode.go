@@ -134,7 +134,8 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 		if offt&0x80 == 0x80 {
 			offt |= 0xff00
 		}
-		return fmt.Sprintf("rel = %d = $%04x", int16(offt), cpu.PC+offt)
+		// add 1 because we used PeekPC instead of ReadPC
+		return fmt.Sprintf("rel = %d = $%04x", int16(offt), cpu.PC+offt+1)
 	case amZpg:
 		return fmt.Sprintf("zpg = $%04x", cpu.PeekPC())
 	case amZpgX:
@@ -144,4 +145,11 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 	default:
 		return fmt.Sprintf("unknown $%02x", am)
 	}
+}
+
+func (am AddressMode) Implied(cpu *Cpu2A03) {
+	if am == amImpl {
+		return
+	}
+	panic("expected amImpl")
 }

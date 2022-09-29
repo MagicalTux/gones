@@ -12,29 +12,36 @@ SED (SEt Decimal)              $F8
 */
 
 func clc(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P &= ^FlagCarry
 }
 
 func sec(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P |= FlagCarry
 }
 
 func cli(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P &= ^FlagInterruptDisable
 }
 
 func sei(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P |= FlagInterruptDisable
 }
 
 func clv(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P &= ^FlagOverflow
 }
 
 func cld(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P &= ^FlagDecimal
 }
 
 func sed(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
 	cpu.P |= FlagDecimal
 }
