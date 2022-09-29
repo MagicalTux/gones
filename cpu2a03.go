@@ -9,3 +9,18 @@ type Cpu2A03 struct {
 
 	Memory *MMU
 }
+
+func New2A03() *Cpu2A03 {
+	cpu := &Cpu2A03{}
+
+	cpu.Memory = NewMMU()
+
+	// setup RAM (2kB=0x800 bytes) with its mirrors
+	ram := make([]byte, 0x0800)
+	cpu.Memory.Map(0x0000, ram)
+	cpu.Memory.Map(0x0800, ram)
+	cpu.Memory.Map(0x1000, ram)
+	cpu.Memory.Map(0x1800, ram)
+
+	return cpu
+}

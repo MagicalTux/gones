@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+
+	"github.com/MagicalTux/gones/mmu"
 )
 
 const (
@@ -33,11 +35,11 @@ func (d *Data) parse() error {
 		return fmt.Errorf("bad file header")
 	}
 
-	numPRG := d.m[4] // Size of PRG ROM in 16 KB units
-	numCHR := d.m[5] // Size of CHR ROM in 8 KB units (Value 0 means the board uses CHR RAM)
+	d.numPRG = d.m[4] // Size of PRG ROM in 16 KB units
+	d.numCHR = d.m[5] // Size of CHR ROM in 8 KB units (Value 0 means the board uses CHR RAM)
 	flg6 := d.m[6]
 	flg7 := d.m[7]
-	numPRGram := int(d.m[8]) + 1 // Size of PRG RAM in 8 KB units (Value 0 infers 8 KB for compatibility)
+	d.numPRGram = int(d.m[8]) + 1 // Size of PRG RAM in 8 KB units (Value 0 infers 8 KB for compatibility)
 	//flg9 := d.m[9]
 	//flg10 := d.m[10]
 	// 11-15: Unused padding (should be filled with zero, but some rippers put their name across bytes 7-15)
@@ -48,11 +50,26 @@ func (d *Data) parse() error {
 		panic("ines2 format not supported")
 	}
 
-	mapper := flg6>>4 | flg7&0xf0
+	d.mapperType = MapperType(flg6>>4 | flg7&0xf0)
 
-	hasTrainer := flg6&flgTrainer == flgTrainer
+	d.hasTrainer = flg6&flgTrainer == flgTrainer
 
-	log.Printf("Parsed iNes1 file, %d*16kB PRG, %d*8kB CHR, %d*8kB PRG RAM, mapper=%d, trainer=%v", numPRG, numCHR, numPRGram, mapper, hasTrainer)
+	log.Printf("Parsed iNes1 file, %d*16kB PRG, %d*8kB CHR, %d*8kB PRG RAM, mapper=%d, trainer=%v", d.numPRG, d.numCHR, d.numPRGram, d.mapperType, d.hasTrainer)
+
+	if f, ok := mappers[d.mapperType]; ok {
+		d.mapper = f()
+	} else {
+		return fmt.Errorf("unsupported mapper %d", d.mapperType)
+	}
+
+	if err := d.mapper.init(d); err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func (d *Data) MapTo(m *mmu.MMU) error {
+	// Map the cartridge data into the MMU
+	return d.mapper.setup(m)
 }

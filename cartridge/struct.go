@@ -7,8 +7,15 @@ import (
 )
 
 type Data struct {
-	f *os.File
-	m []byte // map+len
+	f      *os.File
+	m      []byte // map+len
+	mapper Mapper
+
+	numPRG     byte
+	numCHR     byte
+	numPRGram  int
+	mapperType MapperType
+	hasTrainer bool
 }
 
 func (d *Data) Close() error {
