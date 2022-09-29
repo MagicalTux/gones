@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/MagicalTux/gones/mmu"
+	"github.com/MagicalTux/gones/memory"
 )
 
 const (
@@ -69,7 +69,7 @@ func (d *Data) parse() error {
 	return nil
 }
 
-func (d *Data) MapTo(m *mmu.MMU) error {
+func (d *Data) MapTo(m *memory.MMU) error {
 	// Map the cartridge data into the MMU
 	return d.mapper.setup(m)
 }

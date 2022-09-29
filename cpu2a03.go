@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/MagicalTux/gones/memory"
+)
+
 type Cpu2A03 struct {
 	A    byte   // accumulator
 	X, Y byte   // registers
@@ -7,20 +11,16 @@ type Cpu2A03 struct {
 	S    byte   // stack pointer
 	P    byte   // status register
 
-	Memory *MMU
+	Memory memory.Master
 }
 
 func New2A03() *Cpu2A03 {
 	cpu := &Cpu2A03{}
 
-	cpu.Memory = NewMMU()
+	cpu.Memory = memory.NewMMU()
 
 	// setup RAM (2kB=0x800 bytes) with its mirrors
-	ram := make([]byte, 0x0800)
-	cpu.Memory.Map(0x0000, ram)
-	cpu.Memory.Map(0x0800, ram)
-	cpu.Memory.Map(0x1000, ram)
-	cpu.Memory.Map(0x1800, ram)
+	cpu.Memory.MapHandler(0x0000, 0x2000, memory.NewRAM(0x800))
 
 	return cpu
 }

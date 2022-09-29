@@ -1,6 +1,6 @@
 package cartridge
 
-import "github.com/MagicalTux/gones/mmu"
+import "github.com/MagicalTux/gones/memory"
 
 func init() {
 	mappers[NROM] = func() Mapper {
@@ -18,7 +18,7 @@ func (m *MapperNROM) init(data *Data) error {
 	return nil
 }
 
-func (m *MapperNROM) setup(mem *mmu.MMU) error {
+func (m *MapperNROM) setup(mem *memory.MMU) error {
 	// CPU $6000-$7FFF: Family Basic only: PRG RAM, mirrored as necessary to fill entire 8 KiB window, write protectable with an external switch
 	mem.MapAnonymous(0x6000, 0x2000)
 	// CPU $8000-$BFFF: First 16 KB of ROM.

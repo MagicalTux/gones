@@ -1,4 +1,4 @@
-package main
+package memory
 
 // A page size of 0x100 means 256 pages for the whole 16bit system
 const (
@@ -10,24 +10,13 @@ const (
 
 // see: https://www.nesdev.org/wiki/CPU_memory_map
 
-type mmuHandler interface {
-	MemRead(offset uint16) byte
-	MemWrite(offset uint16, val byte)
-}
-
 type MMU struct {
 	direct   [OffsetSize][]byte
-	indirect [OffsetSize]mmuHandler
-
-	ram []byte // 2kB of ram at 0x0000~
+	indirect [OffsetSize]Handler
 }
 
-func NewMMU() *MMU {
-	res := &MMU{}
-	res.ram = make([]byte, 2048)
-	res.Map(0, res.ram)
-
-	return res
+func NewMMU() Master {
+	return &MMU{}
 }
 
 func (m *MMU) Map(offset uint16, buf []byte) {
@@ -44,6 +33,23 @@ func (m *MMU) Map(offset uint16, buf []byte) {
 	}
 }
 
+func (m *MMU) MapHandler(offset, length uint16, h Handler) {
+	offt := offset >> PageBits
+	cnt := length >> PageBits
+	if length%PageBits != 0 {
+		cnt += 1
+	}
+
+	for i := uint16(0); i < cnt; i++ {
+		m.indirect[offt+i] = h
+	}
+}
+
+func (m *MMU) MapAnonymous(offset uint16, ln uint16) {
+	ram := make([]byte, ln)
+	m.Map(offset, ram)
+}
+
 func (m *MMU) MemRead(offset uint16) byte {
 	offt := offset >> PageBits
 	if v := m.direct[offt]; v != nil {
@@ -58,18 +64,18 @@ func (m *MMU) MemRead(offset uint16) byte {
 	return 0 // page fault
 }
 
-func (m *MMU) MemWrite(offset uint16, val byte) {
+func (m *MMU) MemWrite(offset uint16, val byte) byte {
 	offt := offset >> PageBits
 	if v := m.direct[offt]; v != nil {
 		inoff := int(offset) & (PageSize - 1)
 		if len(v) > inoff {
 			v[inoff] = val
-			return
+			return val
 		}
 	}
 	if v := m.indirect[offt]; v != nil {
-		v.MemWrite(offset, val)
-		return
+		return v.MemWrite(offset, val)
 	}
 	// page fault
+	return 0
 }

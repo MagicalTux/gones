@@ -1,12 +1,12 @@
 package cartridge
 
-import "github.com/MagicalTux/gones/mmu"
+import "github.com/MagicalTux/gones/memory"
 
 type MapperType byte
 
 type Mapper interface {
 	init(d *Data) error
-	setup(m *mmu.MMU) error
+	setup(m *memory.MMU) error
 }
 
 var mappers = make(map[MapperType]func() Mapper)
