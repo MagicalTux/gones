@@ -82,7 +82,7 @@ func (b Bus) String() string {
 	var r []string
 
 	for _, i := range m {
-		r = append(r, fmt.Sprintf("$%02x00~$%02x00: %s", i.start, i.end, i.h))
+		r = append(r, fmt.Sprintf("$%02x00~$%02xff: %s", i.start, i.end-1, i.h))
 	}
 
 	return fmt.Sprintf("Memory Bus containing:\n%s", strings.Join(r, "\n"))

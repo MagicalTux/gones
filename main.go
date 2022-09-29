@@ -10,7 +10,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type Game struct{}
+type Game struct {
+	cpu *Cpu2A03
+}
 
 func (g *Game) Update() error {
 	return nil
@@ -48,10 +50,15 @@ func main() {
 
 	log.Printf("CPU ready with memory: %s", cpu.Memory)
 
+	cpu.Reset()
+	cpu.Step()
+
 	ebiten.SetWindowSize(256*2, 240*2)
 	ebiten.SetWindowTitle("goNES")
 
-	game := &Game{}
+	game := &Game{
+		cpu: cpu,
+	}
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
