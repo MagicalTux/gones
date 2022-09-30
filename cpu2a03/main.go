@@ -36,9 +36,9 @@ type Cpu2A03 struct {
 func New() *Cpu2A03 {
 	cpu := &Cpu2A03{
 		Memory: memory.NewBus(),
-		PPU:    &PPU{},
 		APU:    &APU{},
 	}
+	cpu.PPU = NewPPU(cpu)
 	cpu.APU.cpu = cpu
 
 	trace, err := os.Create("trace_2a03.txt")

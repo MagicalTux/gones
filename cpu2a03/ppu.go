@@ -3,13 +3,16 @@ package cpu2a03
 import (
 	"log"
 	"unsafe"
+
+	"github.com/MagicalTux/gones/memory"
 )
 
 // https://www.nesdev.org/wiki/PPU_rendering#Frame_timing_diagram
 // The PPU renders 262 scanlines per frame. Each scanline lasts for 341 PPU clock cycles (113.667 CPU clock cycles; 1 CPU cycle = 3 PPU cycles), with each clock cycle producing one pixel.
 
 type PPU struct {
-	cpu *Cpu2A03
+	cpu    *Cpu2A03
+	Memory memory.Master
 
 	ctrl    byte // 0x00 at start
 	mask    byte // 0x00 at start
@@ -20,6 +23,26 @@ type PPU struct {
 	data    byte
 
 	x, y uint16
+}
+
+func NewPPU(cpu *Cpu2A03) *PPU {
+	ppu := &PPU{
+		cpu:    cpu,
+		Memory: memory.NewBus(),
+	}
+
+	// https://www.nesdev.org/wiki/PPU_memory_map
+
+	// pattern tables
+	// 0x0000~0x2000 is mapped via CHR ROM to the cartridge, typically
+	// nametables
+	// 0x2000~0x3f00 is mapped typically to the ram
+	//ppu.Memory.MapHandler(0x2000, 0x1f00, memory.NewRAM(0x1000))
+
+	// $3F00-$3F1F	contains Palette RAM indexes - this needs to be separate
+	ppu.Memory.MapHandler(0x3f00, 0x100, memory.NewRAM(32))
+
+	return ppu
 }
 
 func (p *PPU) Reset(cnt uint64) {
