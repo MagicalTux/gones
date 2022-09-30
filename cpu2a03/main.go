@@ -153,8 +153,8 @@ func (cpu *Cpu2A03) Push16(v uint16) {
 
 func (cpu *Cpu2A03) Pull16() uint16 {
 	var v uint16
-	v = uint16(cpu.Pull())
-	v |= uint16(cpu.Pull()) << 8
+	v = uint16(cpu.Pull()) << 8
+	v |= uint16(cpu.Pull())
 	return v
 }
 

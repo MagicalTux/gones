@@ -40,3 +40,9 @@ func dey(cpu *Cpu2A03, am AddressMode) {
 	cpu.Y -= 1
 	cpu.flagsNZ(cpu.Y)
 }
+
+func iny(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
+	cpu.Y += 1
+	cpu.flagsNZ(cpu.Y)
+}

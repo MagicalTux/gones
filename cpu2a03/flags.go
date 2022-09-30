@@ -59,3 +59,7 @@ func (cpu *Cpu2A03) setFlag(flag byte, v bool) {
 		cpu.P &= ^flag
 	}
 }
+
+func (cpu *Cpu2A03) getFlag(flag byte) bool {
+	return cpu.P&flag == flag
+}

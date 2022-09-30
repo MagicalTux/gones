@@ -81,6 +81,4 @@ func jsr(cpu *Cpu2A03, am AddressMode) {
 
 func rts(cpu *Cpu2A03, am AddressMode) {
 	cpu.PC = cpu.Pull16()
-	cpu.msg("RTS loaded PC = $%04x", cpu.PC)
-	cpu.fault = true
 }

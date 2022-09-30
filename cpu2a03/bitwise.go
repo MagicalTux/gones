@@ -19,3 +19,17 @@ func bit(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsZ(v & cpu.A)
 	cpu.flagsN(v)
 }
+
+func and(cpu *Cpu2A03, am AddressMode) {
+	v := am.Read(cpu)
+
+	cpu.A &= v
+	cpu.flagsNZ(cpu.A)
+}
+
+func eor(cpu *Cpu2A03, am AddressMode) {
+	v := am.Read(cpu)
+
+	cpu.A ^= v
+	cpu.flagsNZ(cpu.A)
+}

@@ -58,8 +58,8 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0x28
-	nil,
-	nil,
+	&op{"PLP", plp, amImpl},
+	&op{"AND", and, amImmed},
 	nil,
 	nil,
 	nil,
@@ -68,7 +68,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0x30
-	nil,
+	&op{"BMI", bmi, amRel},
 	nil,
 	nil,
 	nil,
@@ -89,81 +89,81 @@ var cpu2a03op = [256]*op{
 
 	// 0x40
 	nil,
+	&op{"EOR", eor, amIndX},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"EOR", eor, amZpg},
 	nil,
 	nil,
 
 	// 0x48
-	nil,
-	nil,
+	&op{"PHA", pha, amImpl},
+	&op{"EOR", eor, amImmed},
 	nil,
 	nil,
 	&op{"JMP", jmp, amAbs},
-	nil,
+	&op{"EOR", eor, amAbs},
 	nil,
 	nil,
 
 	// 0x50
+	&op{"BVC", bvc, amRel},
+	&op{"EOR", eor, amIndY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
+	&op{"EOR", eor, amZpgX},
 	nil,
 	nil,
 
 	// 0x58
 	nil,
+	&op{"EOR", eor, amAbsY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"EOR", eor, amAbsX},
 	nil,
 	nil,
 
 	// 0x60
 	&op{"RTS", rts, amImpl},
+	&op{"ADC", adc, amIndX},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"ADC", adc, amZpg},
 	nil,
 	nil,
 
 	// 0x68
+	&op{"PLA", pla, amImpl},
+	&op{"ADC", adc, amImmed},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
+	&op{"ADC", adc, amAbs},
 	nil,
 	nil,
 
 	// 0x70
+	&op{"BVS", bvs, amRel},
+	&op{"ADC", adc, amIndY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
+	&op{"ADC", adc, amZpgX},
 	nil,
 	nil,
 
 	// 0x78
 	&op{"SEI", sei, amImpl},
+	&op{"ADC", adc, amAbsY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"ADC", adc, amAbsX},
 	nil,
 	nil,
 
@@ -238,7 +238,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0xb8
-	nil,
+	&op{"CLV", clv, amImpl},
 	nil,
 	nil,
 	nil,
@@ -258,7 +258,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0xc8
-	nil,
+	&op{"INY", iny, amImpl},
 	&op{"CMP", cmp, amImmed},
 	&op{"DEX", dex, amImpl},
 	nil,
@@ -289,41 +289,41 @@ var cpu2a03op = [256]*op{
 
 	// 0xe0
 	&op{"CPX", cpx, amImmed},
+	&op{"SBC", sbc, amIndX},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"SBC", sbc, amZpg},
 	nil,
 	nil,
 
 	// 0xe8
 	nil,
-	nil,
+	&op{"SBC", sbc, amImmed},
 	&op{"NOP", nop, amImpl},
 	nil,
 	nil,
-	nil,
+	&op{"SBC", sbc, amAbs},
 	nil,
 	nil,
 
 	// 0xf0
 	&op{"BEQ", beq, amRel},
+	&op{"SBC", sbc, amIndY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"SBC", sbc, amZpgX},
 	nil,
 	nil,
 
 	// 0xf8
+	&op{"SED", sed, amImpl},
+	&op{"SBC", sbc, amAbsY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
+	&op{"SBC", sbc, amAbsX},
 	nil,
 	nil,
 }
