@@ -63,3 +63,8 @@ func (cpu *Cpu2A03) setFlag(flag byte, v bool) {
 func (cpu *Cpu2A03) getFlag(flag byte) bool {
 	return cpu.P&flag == flag
 }
+
+func (cpu *Cpu2A03) compare(a, b byte) {
+	cpu.flagsNZ(a - b)
+	cpu.setFlag(FlagCarry, a >= b)
+}

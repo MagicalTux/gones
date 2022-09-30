@@ -106,8 +106,8 @@ func (cpu *Cpu2A03) Reset() {
 	cpu.A = 0
 	cpu.X = 0
 	cpu.Y = 0
-	cpu.S = 0xff
-	cpu.P = 0
+	cpu.S = 0xfd
+	cpu.P = 0x24 // FlagIgnored|FlagInterruptDisable
 
 	cpu.cyc = 7 // cpu init typically takes 7 cycles
 	cpu.clk = 7 // which is already done

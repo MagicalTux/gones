@@ -4,27 +4,21 @@ func cmp(cpu *Cpu2A03, am AddressMode) {
 	// compare A with value
 	// A - M
 
-	v := cpu.A - am.Read(cpu)
-
-	cpu.flagsNZ(v) // TODO also set Carry
+	cpu.compare(cpu.A, am.Read(cpu))
 }
 
 func cpx(cpu *Cpu2A03, am AddressMode) {
 	// compare X with value
 	// X - M
 
-	v := cpu.X - am.Read(cpu)
-
-	cpu.flagsNZ(v) // TODO also set Carry
+	cpu.compare(cpu.X, am.Read(cpu))
 }
 
 func cpy(cpu *Cpu2A03, am AddressMode) {
 	// compare X with value
 	// Y - M
 
-	v := cpu.Y - am.Read(cpu)
-
-	cpu.flagsNZ(v) // TODO also set Carry
+	cpu.compare(cpu.Y, am.Read(cpu))
 }
 
 func adc(cpu *Cpu2A03, am AddressMode) {
