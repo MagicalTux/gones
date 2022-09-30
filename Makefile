@@ -9,7 +9,7 @@ all:
 	$(GOROOT)/bin/go build -v
 
 run: all
-	./gones smb1.nes
+	./gones nestest.nes
 
 deps:
 	$(GOROOT)/bin/go get -v -t .

@@ -52,7 +52,7 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		addr := cpu.ReadPC16()
 		return cpu.Read16(addr)
 	case amIndX:
-		addr := uint16(cpu.ReadPC()) + uint16(cpu.X)
+		addr := uint16(cpu.ReadPC() + cpu.X)
 		return cpu.Read16(addr)
 	case amIndY:
 		addr := uint16(cpu.ReadPC())
@@ -66,9 +66,9 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 	case amZpg:
 		return uint16(cpu.ReadPC())
 	case amZpgX:
-		return uint16(cpu.ReadPC()) + uint16(cpu.X)
+		return uint16(cpu.ReadPC() + cpu.X)
 	case amZpgY:
-		return uint16(cpu.ReadPC()) + uint16(cpu.Y)
+		return uint16(cpu.ReadPC() + cpu.Y)
 	default:
 		panic("unhandled address mode")
 	}
@@ -124,11 +124,11 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 		addr := cpu.PeekPC16()
 		return fmt.Sprintf("ind = ($%04x) = $%04x", addr, cpu.Read16(addr))
 	case amIndX:
-		addr := cpu.PeekPC16()
-		return fmt.Sprintf("ind,X = ($%04x,$%02x) = $%04x", addr, cpu.X, cpu.Read16(addr+uint16(cpu.X)))
+		addr := cpu.PeekPC()
+		return fmt.Sprintf("ind,X = ($%04x,$%02x) = $%04x", addr, cpu.X, cpu.Read16(uint16(addr+cpu.X)))
 	case amIndY:
-		addr := cpu.PeekPC16()
-		return fmt.Sprintf("ind,Y = ($%04x),$%02x = $%04x", addr, cpu.Y, cpu.Read16(addr)+uint16(cpu.X))
+		addr := uint16(cpu.PeekPC())
+		return fmt.Sprintf("ind,Y = ($%04x),$%02x = $%04x", addr, cpu.Y, cpu.Read16(addr)+uint16(cpu.Y))
 	case amRel:
 		offt := uint16(cpu.PeekPC())
 		if offt&0x80 == 0x80 {

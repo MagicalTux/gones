@@ -2,14 +2,14 @@ package cpu2a03
 
 // Flags set in cpu.P
 const (
-	FlagCarry            byte = 0x01
-	FlagZero             byte = 0x02
-	FlagInterruptDisable byte = 0x04
-	FlagDecimal          byte = 0x08
-	FlagBreak            byte = 0x10
+	FlagCarry            byte = 0x01 // C
+	FlagZero             byte = 0x02 // Z
+	FlagInterruptDisable byte = 0x04 // I
+	FlagDecimal          byte = 0x08 // D
+	FlagBreak            byte = 0x10 // B
 	FlagIgnored          byte = 0x20
-	FlagOverflow         byte = 0x40
-	FlagNegative         byte = 0x80
+	FlagOverflow         byte = 0x40 // V
+	FlagNegative         byte = 0x80 // N
 )
 
 /*
@@ -36,3 +36,26 @@ Otherwise, overflow is detected and the overflow flag is set.
 (I.e., both operands have a zero in the sign position at bit 7, but bit 7 of the
 result is 1, or, both operands have the sign-bit set, but the result is positive.)
 */
+
+// flagsNZ will set both N and Z flags according to v. This is a very common case
+func (cpu *Cpu2A03) flagsNZ(v byte) {
+	// set flags N & Z based on value v
+	cpu.setFlag(FlagZero, v == 0)
+	cpu.setFlag(FlagNegative, v&0x80 == 0x80)
+}
+
+func (cpu *Cpu2A03) flagsN(v byte) {
+	cpu.setFlag(FlagNegative, v&0x80 == 0x80)
+}
+
+func (cpu *Cpu2A03) flagsZ(v byte) {
+	cpu.setFlag(FlagZero, v == 0)
+}
+
+func (cpu *Cpu2A03) setFlag(flag byte, v bool) {
+	if v {
+		cpu.P |= flag
+	} else {
+		cpu.P &= ^flag
+	}
+}

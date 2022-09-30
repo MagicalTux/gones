@@ -52,6 +52,10 @@ func main() {
 	log.Printf("CPU ready with memory: %s", cpu.Memory)
 
 	cpu.Reset()
+	if arg[0] == "nestest.nes" {
+		// PC for nestest
+		cpu.PC = 0xc000
+	}
 	go cpu.Start(cpu2a03.NTSC)
 
 	ebiten.SetWindowSize(256*2, 240*2)

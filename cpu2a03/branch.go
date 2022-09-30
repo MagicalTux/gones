@@ -1,7 +1,5 @@
 package cpu2a03
 
-import "log"
-
 /*
 MNEMONIC                       HEX
 BPL (Branch on PLus)           $10
@@ -70,15 +68,19 @@ func beq(cpu *Cpu2A03, am AddressMode) {
 	}
 }
 
+func jmp(cpu *Cpu2A03, am AddressMode) {
+	cpu.PC = am.Addr(cpu)
+}
+
 func jsr(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
-	log.Printf("JSR push $%04x", cpu.PC)
+	cpu.msg("JSR push $%04x", cpu.PC)
 	cpu.Push16(cpu.PC)
 	cpu.PC = addr
 }
 
 func rts(cpu *Cpu2A03, am AddressMode) {
 	cpu.PC = cpu.Pull16()
-	log.Printf("RTS loaded PC = $%04x", cpu.PC)
+	cpu.msg("RTS loaded PC = $%04x", cpu.PC)
 	cpu.fault = true
 }

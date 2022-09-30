@@ -3,6 +3,7 @@ package cpu2a03
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/MagicalTux/gones/memory"
@@ -19,6 +20,8 @@ type Cpu2A03 struct {
 	PPU    *PPU
 	APU    *APU
 	fault  bool
+
+	trace *os.File
 }
 
 func New() *Cpu2A03 {
@@ -28,6 +31,11 @@ func New() *Cpu2A03 {
 		APU:    &APU{},
 	}
 	cpu.APU.cpu = cpu
+
+	trace, err := os.Create("trace_2a03.txt")
+	if err == nil {
+		cpu.trace = trace
+	}
 
 	// setup RAM (2kB=0x800 bytes) with its mirrors
 	cpu.Memory.MapHandler(0x0000, 0x2000, memory.NewRAM(0x800))
@@ -63,12 +71,14 @@ func (cpu *Cpu2A03) Clock() {
 	e := cpu.ReadPC()
 	o := cpu2a03op[e]
 	if o == nil || o.f == nil {
-		log.Printf("FATAL CPU ERROR - unsupported op $%02x @ $%04x / %s", e, pos, cpu)
-		cpu.fault = true
+		cpu.fatal("FATAL CPU ERROR - unsupported op $%02x @ $%04x / %s", e, pos, cpu)
 		return
 	}
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
 	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
+	if cpu.trace != nil {
+		fmt.Fprintf(cpu.trace, "CPU Step: [$%04x] %s %s\n", pos, o.i, o.am.Debug(cpu))
+	}
 
 	o.f(cpu, o.am)
 
@@ -88,6 +98,18 @@ func (cpu *Cpu2A03) Reset() {
 	cpu.PC = cpu.Read16(0xfffc)
 
 	log.Printf("CPU reset, new state = %s", cpu)
+}
+
+func (cpu *Cpu2A03) fatal(v string, a ...any) {
+	cpu.fault = true
+	log.Printf("CPU FAULT: "+v, a...)
+	cpu.msg(v, a...)
+}
+
+func (cpu *Cpu2A03) msg(v string, a ...any) {
+	if cpu.trace != nil {
+		fmt.Fprintf(cpu.trace, "Debug: "+v+"\n", a...)
+	}
 }
 
 func (cpu *Cpu2A03) ReadPC() uint8 {
@@ -111,7 +133,7 @@ func (cpu *Cpu2A03) PeekPC16() uint16 {
 }
 
 func (cpu *Cpu2A03) Push(v byte) {
-	log.Printf("CPU Stack push $%02x", v)
+	cpu.msg("CPU Stack push $%02x", v)
 	cpu.Memory.MemWrite(0x100+uint16(cpu.S), v)
 	cpu.S -= 1
 }
@@ -119,7 +141,7 @@ func (cpu *Cpu2A03) Push(v byte) {
 func (cpu *Cpu2A03) Pull() byte {
 	cpu.S += 1
 	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
-	log.Printf("CPU Stack pull $%02x S=%02x", v, cpu.S)
+	cpu.msg("CPU Stack pull $%02x S=%02x", v, cpu.S)
 	return v
 }
 
@@ -134,20 +156,6 @@ func (cpu *Cpu2A03) Pull16() uint16 {
 	v = uint16(cpu.Pull())
 	v |= uint16(cpu.Pull()) << 8
 	return v
-}
-
-func (cpu *Cpu2A03) flagsNZ(v byte) {
-	// set flags N & Z based on value v
-	if v == 0 {
-		cpu.P |= FlagZero
-	} else {
-		cpu.P &= ^FlagZero
-	}
-	if v&0x80 == 0x80 {
-		cpu.P |= FlagNegative
-	} else {
-		cpu.P &= ^FlagNegative
-	}
 }
 
 func (cpu *Cpu2A03) Read16(offt uint16) uint16 {

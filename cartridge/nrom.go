@@ -1,6 +1,10 @@
 package cartridge
 
-import "github.com/MagicalTux/gones/memory"
+import (
+	"log"
+
+	"github.com/MagicalTux/gones/memory"
+)
 
 const (
 	NROM MapperType = 0x00 // Nintendo cartridge boards NES-NROM-128, NES-NROM-256, their HVC counterparts, and clone boards
@@ -23,7 +27,11 @@ func (m *MapperNROM) Setup(mem memory.Master) error {
 
 	// CPU $8000-$BFFF: First 16 KB of ROM.
 	// CPU $C000-$FFFF: Last 16 KB of ROM (NROM-256) or mirror of $8000-$BFFF (NROM-128).
-	mem.MapHandler(0x8000, 0x8000, memory.ROM(m.data.PRG()))
+	rom := memory.ROM(m.data.PRG())
+	mem.MapHandler(0x8000, 0x8000, rom)
+
+	log.Printf("TEST ROM 0x00 = $%02x", m.data.PRG()[0])
+	log.Printf("TEST ROM 0x00 = $%02x", rom.MemRead(0))
 
 	return nil
 }
