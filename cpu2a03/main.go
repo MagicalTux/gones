@@ -3,6 +3,7 @@ package cpu2a03
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/MagicalTux/gones/memory"
 )
@@ -36,7 +37,24 @@ func New() *Cpu2A03 {
 	return cpu
 }
 
-func (cpu *Cpu2A03) Step() {
+// Typically this runs into a goroutine
+// go cpu.Start(cpu2a03.NTSC)
+func (cpu *Cpu2A03) Start(clockLn time.Duration) {
+	t := time.NewTicker(clockLn)
+	defer t.Stop()
+
+	for !cpu.fault {
+		cpu.Clock()
+
+		select {
+		case <-t.C:
+		}
+	}
+
+	log.Printf("CPU stopped due to fault: %s", cpu)
+}
+
+func (cpu *Cpu2A03) Clock() {
 	if cpu.fault {
 		return
 	}
@@ -50,9 +68,12 @@ func (cpu *Cpu2A03) Step() {
 		return
 	}
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
-	log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
+	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
 
 	o.f(cpu, o.am)
+
+	// move PPU forward
+	cpu.PPU.Clock(3)
 }
 
 func (cpu *Cpu2A03) Reset() {
@@ -90,6 +111,7 @@ func (cpu *Cpu2A03) PeekPC16() uint16 {
 }
 
 func (cpu *Cpu2A03) Push(v byte) {
+	log.Printf("CPU Stack push $%02x", v)
 	cpu.Memory.MemWrite(0x100+uint16(cpu.S), v)
 	cpu.S -= 1
 }
@@ -97,6 +119,7 @@ func (cpu *Cpu2A03) Push(v byte) {
 func (cpu *Cpu2A03) Pull() byte {
 	cpu.S += 1
 	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
+	log.Printf("CPU Stack pull $%02x S=%02x", v, cpu.S)
 	return v
 }
 

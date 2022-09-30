@@ -48,7 +48,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0x20
-	nil,
+	&op{"JSR", jsr, amAbs},
 	nil,
 	nil,
 	nil,
@@ -128,7 +128,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0x60
-	nil,
+	&op{"RTS", rts, amImpl},
 	nil,
 	nil,
 	nil,
@@ -173,12 +173,12 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"STA", sta, amZpg},
+	&op{"STX", stx, amZpg},
 	nil,
 
 	// 0x88
-	nil,
+	&op{"DEY", dey, amImpl},
 	nil,
 	nil,
 	nil,
@@ -189,7 +189,7 @@ var cpu2a03op = [256]*op{
 
 	// 0x90
 	nil,
-	nil,
+	&op{"STA", sta, amIndY},
 	nil,
 	nil,
 	nil,
@@ -248,7 +248,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0xc0
-	nil,
+	&op{"CPY", cpy, amImmed},
 	nil,
 	nil,
 	nil,
@@ -268,7 +268,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0xd0
-	nil,
+	&op{"BNE", bne, amRel},
 	nil,
 	nil,
 	nil,
@@ -288,7 +288,7 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0xe0
-	nil,
+	&op{"CPX", cpx, amImmed},
 	nil,
 	nil,
 	nil,

@@ -16,7 +16,6 @@ type Game struct {
 }
 
 func (g *Game) Update() error {
-	g.cpu.Step()
 	return nil
 }
 
@@ -53,6 +52,7 @@ func main() {
 	log.Printf("CPU ready with memory: %s", cpu.Memory)
 
 	cpu.Reset()
+	go cpu.Start(cpu2a03.NTSC)
 
 	ebiten.SetWindowSize(256*2, 240*2)
 	ebiten.SetWindowTitle("goNES")

@@ -33,3 +33,10 @@ func dex(cpu *Cpu2A03, am AddressMode) {
 	cpu.X -= 1
 	cpu.flagsNZ(cpu.X)
 }
+
+func dey(cpu *Cpu2A03, am AddressMode) {
+	// Y - 1 -> Y
+	am.Implied(cpu)
+	cpu.Y -= 1
+	cpu.flagsNZ(cpu.Y)
+}
