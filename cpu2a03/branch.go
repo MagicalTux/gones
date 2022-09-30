@@ -75,10 +75,10 @@ func jmp(cpu *Cpu2A03, am AddressMode) {
 func jsr(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	cpu.msg("JSR push $%04x", cpu.PC)
-	cpu.Push16(cpu.PC)
+	cpu.Push16(cpu.PC - 1)
 	cpu.PC = addr
 }
 
 func rts(cpu *Cpu2A03, am AddressMode) {
-	cpu.PC = cpu.Pull16()
+	cpu.PC = cpu.Pull16() + 1
 }

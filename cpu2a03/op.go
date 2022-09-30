@@ -92,7 +92,7 @@ var cpu2a03op = [256]*op{
 	&op{"EOR", eor, amIndX},
 	nil,
 	nil,
-	nil,
+	&op{"NOP", nop, amZpg},
 	&op{"EOR", eor, amZpg},
 	&op{"LSR", lsr, amZpg},
 	nil,
