@@ -14,17 +14,17 @@ var cpu2a03op = [256]*op{
 	&op{"SLO", nil, amIndX},  // invalid
 	&op{"NOP", nop, amZpg},   // invalid
 	&op{"ORA", ora, amZpg},
-	&op{"ASL", nil, amZpg},
+	&op{"ASL", asl, amZpg},
 	&op{"SLO", nil, amZpg},
 
 	// 0x08
 	&op{"PHP", php, amImpl},
 	&op{"ORA", ora, amImmed},
-	&op{"ASL", nil, amAcc},
+	&op{"ASL", asl, amAcc},
 	&op{"ANC", nil, amImmed},
 	&op{"NOP", nop, amAbs},
 	&op{"ORA", ora, amAbs},
-	&op{"ASL", nil, amAbs},
+	&op{"ASL", asl, amAbs},
 	&op{"SLO", nil, amAbs},
 
 	// 0x10
@@ -34,7 +34,7 @@ var cpu2a03op = [256]*op{
 	&op{"SLO", nil, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"ORA", ora, amZpgX},
-	&op{"ASL", nil, amZpgX},
+	&op{"ASL", asl, amZpgX},
 	&op{"SLO", nil, amZpgX},
 
 	// 0x18
@@ -44,7 +44,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	nil,
-	nil,
+	&op{"ASL", asl, amAbsX},
 	nil,
 
 	// 0x20
@@ -54,17 +54,17 @@ var cpu2a03op = [256]*op{
 	nil,
 	&op{"BIT", bit, amZpg},
 	nil,
-	nil,
+	&op{"ROL", rol, amZpg},
 	nil,
 
 	// 0x28
 	&op{"PLP", plp, amImpl},
 	&op{"AND", and, amImmed},
+	&op{"ROL", rol, amAcc},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"ROL", rol, amAbs},
 	nil,
 
 	// 0x30
@@ -74,7 +74,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	nil,
-	nil,
+	&op{"ROL", rol, amZpgX},
 	nil,
 
 	// 0x38
@@ -84,7 +84,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	nil,
-	nil,
+	&op{"ROL", rol, amAbsX},
 	nil,
 
 	// 0x40

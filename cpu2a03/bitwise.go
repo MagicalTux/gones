@@ -72,3 +72,42 @@ func lsr(cpu *Cpu2A03, am AddressMode) {
 		cpu.flagsNZ(v)
 	}
 }
+
+func asl(cpu *Cpu2A03, am AddressMode) {
+	if am == amAcc {
+		cpu.setFlag(FlagCarry, cpu.A&0x80 == 0x80)
+		cpu.A <<= 1
+		cpu.flagsNZ(cpu.A)
+	} else {
+		addr := am.Addr(cpu)
+		v := cpu.Memory.MemRead(addr)
+
+		cpu.setFlag(FlagCarry, v&0x80 == 0x80)
+		v <<= 1
+		cpu.Memory.MemWrite(addr, v)
+		cpu.flagsNZ(v)
+	}
+}
+
+func rol(cpu *Cpu2A03, am AddressMode) {
+	c := byte(0)
+	if cpu.getFlag(FlagCarry) {
+		c = 1
+	}
+
+	if am == amAcc {
+		// act on cpu.A
+		cpu.setFlag(FlagCarry, cpu.A&0x80 == 0x80)
+		cpu.A = cpu.A<<1 | c
+		cpu.flagsNZ(cpu.A)
+	} else {
+		// act on mem
+		addr := am.Addr(cpu)
+		v := cpu.Memory.MemRead(addr)
+
+		cpu.setFlag(FlagCarry, v&0x80 == 0x80)
+		v = (v << 1) | c
+		cpu.Memory.MemWrite(addr, v)
+		cpu.flagsNZ(v)
+	}
+}
