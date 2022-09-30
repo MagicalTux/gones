@@ -9,6 +9,12 @@ import (
 	"github.com/MagicalTux/gones/memory"
 )
 
+const (
+	NMIVector   = 0xfffa
+	ResetVector = 0xfffc
+	IRQVector   = 0xfffe
+)
+
 type Cpu2A03 struct {
 	A    byte   // accumulator
 	X, Y byte   // registers
@@ -16,10 +22,11 @@ type Cpu2A03 struct {
 	S    byte   // stack pointer
 	P    byte   // status register
 
-	Memory memory.Master
-	PPU    *PPU
-	APU    *APU
-	fault  bool
+	Memory    memory.Master
+	PPU       *PPU
+	APU       *APU
+	fault     bool
+	interrupt byte
 
 	trace *os.File
 	cyc   uint64
@@ -41,8 +48,8 @@ func New() *Cpu2A03 {
 
 	// setup RAM (2kB=0x800 bytes) with its mirrors
 	cpu.Memory.MapHandler(0x0000, 0x2000, memory.NewRAM(0x800))
-	cpu.Memory.MapHandler(0x2000, 0x2000, cpu.PPU)
-	cpu.Memory.MapHandler(0x4000, 0x2000, cpu.APU)
+	cpu.Memory.MapHandler(0x2000, 0x2000, cpu.PPU) // PPU at 0x2000
+	cpu.Memory.MapHandler(0x4000, 0x2000, cpu.APU) // APU at 0x4000
 
 	return cpu
 }
@@ -78,6 +85,11 @@ func (cpu *Cpu2A03) Clock() {
 		return
 	}
 
+	if cpu.interrupt != InterruptNone {
+		cpu.handleInterrupt()
+		cpu.interrupt = InterruptNone
+	}
+
 	pos := cpu.PC
 	// read value at PC
 	e := cpu.ReadPC()
@@ -107,13 +119,13 @@ func (cpu *Cpu2A03) Reset() {
 	cpu.X = 0
 	cpu.Y = 0
 	cpu.S = 0xfd
-	cpu.P = 0x24 // FlagIgnored|FlagInterruptDisable
+	cpu.P = FlagIgnored | FlagInterruptDisable
 
 	cpu.cyc = 7 // cpu init typically takes 7 cycles
 	cpu.clk = 7 // which is already done
 
 	// $FFFC-$FFFD = Reset vector
-	cpu.PC = cpu.Read16(0xfffc)
+	cpu.PC = cpu.Read16(ResetVector)
 
 	cpu.PPU.Reset(cpu.cyc)
 
