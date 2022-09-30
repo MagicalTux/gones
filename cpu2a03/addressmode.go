@@ -21,19 +21,20 @@ zpg,Y	zeropage, Y-indexed	OPC $LL,Y	operand is zeropage address; effective addre
 type AddressMode byte
 
 const (
-	amAcc   AddressMode = 1
-	amAbs   AddressMode = 2
-	amAbsX  AddressMode = 3
-	amAbsY  AddressMode = 4
-	amImmed AddressMode = 5
-	amImpl  AddressMode = 6
-	amInd   AddressMode = 7
-	amIndX  AddressMode = 8
-	amIndY  AddressMode = 9
-	amRel   AddressMode = 10
-	amZpg   AddressMode = 11
-	amZpgX  AddressMode = 12
-	amZpgY  AddressMode = 13
+	amInvalid AddressMode = iota
+	amAcc
+	amAbs
+	amAbsX
+	amAbsY
+	amImmed
+	amImpl
+	amInd
+	amIndX
+	amIndY
+	amRel
+	amZpg
+	amZpgX
+	amZpgY
 )
 
 func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
