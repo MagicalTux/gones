@@ -60,6 +60,10 @@ func (cpu *Cpu2A03) Start(clockLn time.Duration) {
 	}
 
 	log.Printf("CPU stopped due to fault: %s", cpu)
+
+	for i := uint16(2); i <= 3; i++ {
+		log.Printf("Address value at %d: $%02x", i, cpu.Memory.MemRead(i))
+	}
 }
 
 func (cpu *Cpu2A03) Clock() {
@@ -91,7 +95,7 @@ func (cpu *Cpu2A03) Reset() {
 	cpu.A = 0
 	cpu.X = 0
 	cpu.Y = 0
-	cpu.S = 0
+	cpu.S = 0xff
 	cpu.P = 0
 
 	// $FFFC-$FFFD = Reset vector
@@ -133,7 +137,7 @@ func (cpu *Cpu2A03) PeekPC16() uint16 {
 }
 
 func (cpu *Cpu2A03) Push(v byte) {
-	cpu.msg("CPU Stack push $%02x", v)
+	//cpu.msg("CPU Stack push $%02x", v)
 	cpu.Memory.MemWrite(0x100+uint16(cpu.S), v)
 	cpu.S -= 1
 }
@@ -141,7 +145,7 @@ func (cpu *Cpu2A03) Push(v byte) {
 func (cpu *Cpu2A03) Pull() byte {
 	cpu.S += 1
 	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
-	cpu.msg("CPU Stack pull $%02x S=%02x", v, cpu.S)
+	//cpu.msg("CPU Stack pull $%02x S=%02x", v, cpu.S)
 	return v
 }
 
@@ -162,6 +166,20 @@ func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
 	// little endian read
 	a := cpu.Memory.MemRead(offt)
 	b := cpu.Memory.MemRead(offt + 1)
+
+	return uint16(a) | uint16(b)<<8
+}
+
+func (cpu *Cpu2A03) Read16W(offt uint16) uint16 {
+	// little endian read wrapping around current page
+	a := cpu.Memory.MemRead(offt)
+	if offt&0xff == 0xff {
+		// would wrap
+		offt &= 0xff00
+	} else {
+		offt += 1
+	}
+	b := cpu.Memory.MemRead(offt)
 
 	return uint16(a) | uint16(b)<<8
 }

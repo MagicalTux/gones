@@ -50,7 +50,7 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		panic("amImmed.Addr()")
 	case amInd:
 		addr := cpu.ReadPC16()
-		return cpu.Read16(addr)
+		return cpu.Read16W(addr)
 	case amIndX:
 		addr := uint16(cpu.ReadPC() + cpu.X)
 		return cpu.Read16(addr)
@@ -122,7 +122,7 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 		return "impl"
 	case amInd:
 		addr := cpu.PeekPC16()
-		return fmt.Sprintf("ind = ($%04x) = $%04x", addr, cpu.Read16(addr))
+		return fmt.Sprintf("ind = ($%04x) = $%04x", addr, cpu.Read16W(addr))
 	case amIndX:
 		addr := cpu.PeekPC()
 		return fmt.Sprintf("ind,X = ($%04x,$%02x) = $%04x", addr, cpu.X, cpu.Read16(uint16(addr+cpu.X)))

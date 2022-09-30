@@ -72,3 +72,17 @@ func iny(cpu *Cpu2A03, am AddressMode) {
 	cpu.Y += 1
 	cpu.flagsNZ(cpu.Y)
 }
+
+func lax(cpu *Cpu2A03, am AddressMode) {
+	v := am.Read(cpu)
+	cpu.A = v
+	cpu.X = v
+	cpu.flagsNZ(v)
+}
+
+func sax(cpu *Cpu2A03, am AddressMode) {
+	// A AND X -> M
+	// no flags
+	v := cpu.A & cpu.X
+	am.Write(cpu, v)
+}

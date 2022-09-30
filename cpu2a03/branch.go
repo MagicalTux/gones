@@ -74,8 +74,7 @@ func jmp(cpu *Cpu2A03, am AddressMode) {
 
 func jsr(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
-	cpu.msg("JSR push $%04x", cpu.PC)
-	cpu.Push16(cpu.PC - 1)
+	cpu.Push16(cpu.PC - 1) // push PC+2 (we are at PC+3 now)
 	cpu.PC = addr
 }
 
