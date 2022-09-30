@@ -280,7 +280,7 @@ var cpu2a03op = [256]*op{
 
 	// 0xd8
 	&op{"CLD", cld, amImpl, 2},
-	&op{"CMP", cmp, amAbsY, 7},
+	&op{"CMP", cmp, amAbsY, 4},
 	&op{"NOP", nop, amImpl, 2},
 	&op{"DCP", dcp, amAbsY, 7},
 	&op{"CMP", cmp, amAbsX, 4},

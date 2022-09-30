@@ -21,6 +21,7 @@ func txs(cpu *Cpu2A03, am AddressMode) {
 func tsx(cpu *Cpu2A03, am AddressMode) {
 	am.Implied(cpu)
 	cpu.X = cpu.S
+	cpu.flagsNZ(cpu.X)
 }
 
 func pha(cpu *Cpu2A03, am AddressMode) {
@@ -31,14 +32,15 @@ func pha(cpu *Cpu2A03, am AddressMode) {
 func pla(cpu *Cpu2A03, am AddressMode) {
 	am.Implied(cpu)
 	cpu.A = cpu.Pull()
+	cpu.flagsNZ(cpu.A)
 }
 
 func php(cpu *Cpu2A03, am AddressMode) {
 	am.Implied(cpu)
-	cpu.Push(cpu.P)
+	cpu.Push(cpu.P | FlagBreak)
 }
 
 func plp(cpu *Cpu2A03, am AddressMode) {
 	am.Implied(cpu)
-	cpu.P = cpu.Pull()
+	cpu.P = cpu.Pull() & ^FlagBreak | FlagIgnored
 }
