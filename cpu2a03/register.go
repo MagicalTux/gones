@@ -27,10 +27,36 @@ func sty(cpu *Cpu2A03, am AddressMode) {
 	am.Write(cpu, cpu.Y)
 }
 
+func tax(cpu *Cpu2A03, am AddressMode) {
+	cpu.X = cpu.A
+	cpu.flagsNZ(cpu.X)
+}
+
+func txa(cpu *Cpu2A03, am AddressMode) {
+	cpu.A = cpu.X
+	cpu.flagsNZ(cpu.A)
+}
+
+func tay(cpu *Cpu2A03, am AddressMode) {
+	cpu.Y = cpu.A
+	cpu.flagsNZ(cpu.Y)
+}
+
+func tya(cpu *Cpu2A03, am AddressMode) {
+	cpu.A = cpu.Y
+	cpu.flagsNZ(cpu.A)
+}
+
 func dex(cpu *Cpu2A03, am AddressMode) {
 	// X - 1 -> X
 	am.Implied(cpu)
 	cpu.X -= 1
+	cpu.flagsNZ(cpu.X)
+}
+
+func inx(cpu *Cpu2A03, am AddressMode) {
+	am.Implied(cpu)
+	cpu.X += 1
 	cpu.flagsNZ(cpu.X)
 }
 
