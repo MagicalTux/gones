@@ -93,6 +93,19 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 	}
 }
 
+func (am AddressMode) AddrFast(cpu *Cpu2A03) uint16 {
+	switch am {
+	case amAbsX:
+		return cpu.ReadPC16() + uint16(cpu.X)
+	case amAbsY:
+		return cpu.ReadPC16() + uint16(cpu.Y)
+	case amIndY:
+		return cpu.Read16W(uint16(cpu.ReadPC())) + uint16(cpu.Y)
+	default:
+		return am.Addr(cpu)
+	}
+}
+
 func (am AddressMode) Read(cpu *Cpu2A03) byte {
 	switch am {
 	case amAcc:
@@ -122,6 +135,16 @@ func (am AddressMode) Write(cpu *Cpu2A03, v byte) {
 		panic("amRel.Write()")
 	default:
 		cpu.Memory.MemWrite(am.Addr(cpu), v)
+	}
+}
+
+// WriteFast writes without losing cycles
+func (am AddressMode) WriteFast(cpu *Cpu2A03, v byte) {
+	switch am {
+	case amAbsX, amAbsY, amIndY:
+		cpu.Memory.MemWrite(am.AddrFast(cpu), v)
+	default:
+		am.Write(cpu, v)
 	}
 }
 

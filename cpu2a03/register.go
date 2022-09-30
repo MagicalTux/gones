@@ -16,15 +16,15 @@ func ldy(cpu *Cpu2A03, am AddressMode) {
 }
 
 func sta(cpu *Cpu2A03, am AddressMode) {
-	am.Write(cpu, cpu.A)
+	am.WriteFast(cpu, cpu.A)
 }
 
 func stx(cpu *Cpu2A03, am AddressMode) {
-	am.Write(cpu, cpu.X)
+	am.WriteFast(cpu, cpu.X)
 }
 
 func sty(cpu *Cpu2A03, am AddressMode) {
-	am.Write(cpu, cpu.Y)
+	am.WriteFast(cpu, cpu.Y)
 }
 
 func tax(cpu *Cpu2A03, am AddressMode) {
