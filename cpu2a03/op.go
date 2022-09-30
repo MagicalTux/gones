@@ -10,7 +10,7 @@ var cpu2a03op = [256]*op{
 	// 0x00
 	&op{"BRK", brk, amImmed}, // actually amImpl, but makes more sense like that
 	&op{"ORA", ora, amIndX},
-	&op{"STP", stop, amImpl}, // invalid
+	&op{"JAM", stop, amImpl}, // invalid
 	&op{"SLO", slo, amIndX},  // invalid
 	&op{"NOP", nop, amZpg},   // invalid
 	&op{"ORA", ora, amZpg},
@@ -21,7 +21,7 @@ var cpu2a03op = [256]*op{
 	&op{"PHP", php, amImpl},
 	&op{"ORA", ora, amImmed},
 	&op{"ASL", asl, amAcc},
-	&op{"ANC", nil, amImmed},
+	&op{"ANC", anc, amImmed},
 	&op{"NOP", nop, amAbs},
 	&op{"ORA", ora, amAbs},
 	&op{"ASL", asl, amAbs},
@@ -30,7 +30,7 @@ var cpu2a03op = [256]*op{
 	// 0x10
 	&op{"BPL", bpl, amRel},
 	&op{"ORA", ora, amIndY},
-	&op{"STP", nil, amImpl},
+	&op{"JAM", stop, amImpl},
 	&op{"SLO", slo, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"ORA", ora, amZpgX},
@@ -50,7 +50,7 @@ var cpu2a03op = [256]*op{
 	// 0x20
 	&op{"JSR", jsr, amAbs},
 	&op{"AND", and, amIndX},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"RLA", rla, amIndX},
 	&op{"BIT", bit, amZpg},
 	&op{"AND", and, amZpg},
@@ -61,7 +61,7 @@ var cpu2a03op = [256]*op{
 	&op{"PLP", plp, amImpl},
 	&op{"AND", and, amImmed},
 	&op{"ROL", rol, amAcc},
-	nil,
+	&op{"ANC", anc, amImmed},
 	&op{"BIT", bit, amAbs},
 	&op{"AND", and, amAbs},
 	&op{"ROL", rol, amAbs},
@@ -70,7 +70,7 @@ var cpu2a03op = [256]*op{
 	// 0x30
 	&op{"BMI", bmi, amRel},
 	&op{"AND", and, amIndY},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"RLA", rla, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"AND", and, amZpgX},
@@ -90,7 +90,7 @@ var cpu2a03op = [256]*op{
 	// 0x40
 	&op{"RTI", rti, amImpl},
 	&op{"EOR", eor, amIndX},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"SRE", sre, amIndX},
 	&op{"NOP", nop, amZpg},
 	&op{"EOR", eor, amZpg},
@@ -101,7 +101,7 @@ var cpu2a03op = [256]*op{
 	&op{"PHA", pha, amImpl},
 	&op{"EOR", eor, amImmed},
 	&op{"LSR", lsr, amAcc},
-	nil,
+	&op{"ALR", alr, amImmed},
 	&op{"JMP", jmp, amAbs},
 	&op{"EOR", eor, amAbs},
 	&op{"LSR", lsr, amAbs},
@@ -110,7 +110,7 @@ var cpu2a03op = [256]*op{
 	// 0x50
 	&op{"BVC", bvc, amRel},
 	&op{"EOR", eor, amIndY},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"SRE", sre, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"EOR", eor, amZpgX},
@@ -118,7 +118,7 @@ var cpu2a03op = [256]*op{
 	&op{"SRE", sre, amZpgX},
 
 	// 0x58
-	nil,
+	&op{"CLI", cli, amImpl},
 	&op{"EOR", eor, amAbsY},
 	&op{"NOP", nop, amImpl},
 	&op{"SRE", sre, amAbsY},
@@ -130,7 +130,7 @@ var cpu2a03op = [256]*op{
 	// 0x60
 	&op{"RTS", rts, amImpl},
 	&op{"ADC", adc, amIndX},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"RRA", rra, amIndX},
 	&op{"NOP", nop, amZpg},
 	&op{"ADC", adc, amZpg},
@@ -141,7 +141,7 @@ var cpu2a03op = [256]*op{
 	&op{"PLA", pla, amImpl},
 	&op{"ADC", adc, amImmed},
 	&op{"ROR", ror, amAcc},
-	nil,
+	&op{"ARR", arr, amImmed},
 	&op{"JMP", jmp, amInd},
 	&op{"ADC", adc, amAbs},
 	&op{"ROR", ror, amAbs},
@@ -150,7 +150,7 @@ var cpu2a03op = [256]*op{
 	// 0x70
 	&op{"BVS", bvs, amRel},
 	&op{"ADC", adc, amIndY},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"RRA", rra, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"ADC", adc, amZpgX},
@@ -170,7 +170,7 @@ var cpu2a03op = [256]*op{
 	// 0x80
 	&op{"NOP", nop, amImmed},
 	&op{"STA", sta, amIndX},
-	nil,
+	&op{"NOP", nop, amImmed},
 	&op{"SAX", sax, amIndX},
 	&op{"STY", sty, amZpg},
 	&op{"STA", sta, amZpg},
@@ -179,9 +179,9 @@ var cpu2a03op = [256]*op{
 
 	// 0x88
 	&op{"DEY", dey, amImpl},
-	nil,
+	&op{"NOP", nop, amImmed},
 	&op{"TXA", txa, amImpl},
-	nil,
+	&op{"ANE", ane, amImmed},
 	&op{"STY", sty, amAbs},
 	&op{"STA", sta, amAbs},
 	&op{"STX", stx, amAbs},
@@ -190,8 +190,8 @@ var cpu2a03op = [256]*op{
 	// 0x90
 	&op{"BCC", bcc, amRel},
 	&op{"STA", sta, amIndY},
-	nil,
-	nil,
+	&op{"JAM", stop, amImpl},
+	&op{"SHA", sha, amIndY},
 	&op{"STY", sty, amZpgX},
 	&op{"STA", sta, amZpgX},
 	&op{"STX", stx, amZpgY},
@@ -205,7 +205,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	&op{"STA", sta, amAbsX},
 	nil,
-	nil,
+	&op{"SHA", sha, amAbsY},
 
 	// 0xa0
 	&op{"LDY", ldy, amImmed},
@@ -230,7 +230,7 @@ var cpu2a03op = [256]*op{
 	// 0xb0
 	&op{"BCS", bcs, amRel},
 	&op{"LDA", lda, amIndY},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"LAX", lax, amIndY},
 	&op{"LDY", ldy, amZpgX},
 	&op{"LDA", lda, amZpgX},
@@ -250,7 +250,7 @@ var cpu2a03op = [256]*op{
 	// 0xc0
 	&op{"CPY", cpy, amImmed},
 	&op{"CMP", cmp, amIndX},
-	nil,
+	&op{"NOP", nop, amImmed},
 	&op{"DCP", dcp, amIndX},
 	&op{"CPY", cpy, amZpg},
 	&op{"CMP", cmp, amZpg},
@@ -270,7 +270,7 @@ var cpu2a03op = [256]*op{
 	// 0xd0
 	&op{"BNE", bne, amRel},
 	&op{"CMP", cmp, amIndY},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"DCP", dcp, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"CMP", cmp, amZpgX},
@@ -290,7 +290,7 @@ var cpu2a03op = [256]*op{
 	// 0xe0
 	&op{"CPX", cpx, amImmed},
 	&op{"SBC", sbc, amIndX},
-	nil,
+	&op{"NOP", nop, amImmed},
 	&op{"ISC", isc, amIndX},
 	&op{"CPX", cpx, amZpg},
 	&op{"SBC", sbc, amZpg},
@@ -310,7 +310,7 @@ var cpu2a03op = [256]*op{
 	// 0xf0
 	&op{"BEQ", beq, amRel},
 	&op{"SBC", sbc, amIndY},
-	nil,
+	&op{"JAM", stop, amImpl},
 	&op{"ISC", isc, amIndY},
 	&op{"NOP", nop, amZpgX},
 	&op{"SBC", sbc, amZpgX},
