@@ -10,6 +10,15 @@ func brk(cpu *Cpu2A03, am AddressMode) {
 	cpu.PC = cpu.Read16(0xfffe) // IRQ/BRK
 }
 
+func rti(cpu *Cpu2A03, am AddressMode) {
+	p := cpu.Pull()
+	p &= ^byte(0x30)  // ignore B and bit5
+	p |= cpu.P & 0x30 // load B and bit5 from P
+	cpu.P = p
+
+	cpu.PC = cpu.Pull16()
+}
+
 func stop(cpu *Cpu2A03, am AddressMode) {
 	log.Printf("CPU: STOP instruction at $%04x", cpu.PC-1)
 	cpu.fault = true

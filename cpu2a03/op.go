@@ -88,23 +88,23 @@ var cpu2a03op = [256]*op{
 	nil,
 
 	// 0x40
-	nil,
+	&op{"RTI", rti, amImpl},
 	&op{"EOR", eor, amIndX},
 	nil,
 	nil,
 	nil,
 	&op{"EOR", eor, amZpg},
-	nil,
+	&op{"LSR", lsr, amZpg},
 	nil,
 
 	// 0x48
 	&op{"PHA", pha, amImpl},
 	&op{"EOR", eor, amImmed},
-	nil,
+	&op{"LSR", lsr, amAcc},
 	nil,
 	&op{"JMP", jmp, amAbs},
 	&op{"EOR", eor, amAbs},
-	nil,
+	&op{"LSR", lsr, amAbs},
 	nil,
 
 	// 0x50
@@ -114,7 +114,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	&op{"EOR", eor, amZpgX},
-	nil,
+	&op{"LSR", lsr, amZpgX},
 	nil,
 
 	// 0x58
@@ -124,7 +124,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	&op{"EOR", eor, amAbsX},
-	nil,
+	&op{"LSR", lsr, amAbsX},
 	nil,
 
 	// 0x60
@@ -134,17 +134,17 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	&op{"ADC", adc, amZpg},
-	nil,
+	&op{"ROR", ror, amZpg},
 	nil,
 
 	// 0x68
 	&op{"PLA", pla, amImpl},
 	&op{"ADC", adc, amImmed},
-	nil,
+	&op{"ROR", ror, amAcc},
 	nil,
 	nil,
 	&op{"ADC", adc, amAbs},
-	nil,
+	&op{"ROR", ror, amAbs},
 	nil,
 
 	// 0x70
@@ -154,7 +154,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	&op{"ADC", adc, amZpgX},
-	nil,
+	&op{"ROR", ror, amZpgX},
 	nil,
 
 	// 0x78
@@ -164,7 +164,7 @@ var cpu2a03op = [256]*op{
 	nil,
 	nil,
 	&op{"ADC", adc, amAbsX},
-	nil,
+	&op{"ROR", ror, amAbsX},
 	nil,
 
 	// 0x80
@@ -249,12 +249,12 @@ var cpu2a03op = [256]*op{
 
 	// 0xc0
 	&op{"CPY", cpy, amImmed},
+	&op{"CMP", cmp, amIndX},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
+	&op{"CMP", cmp, amZpg},
+	&op{"DEC", dec, amZpg},
 	nil,
 
 	// 0xc8
@@ -263,28 +263,28 @@ var cpu2a03op = [256]*op{
 	&op{"DEX", dex, amImpl},
 	nil,
 	nil,
-	nil,
-	nil,
+	&op{"CMP", cmp, amAbs},
+	&op{"DEC", dec, amAbs},
 	nil,
 
 	// 0xd0
 	&op{"BNE", bne, amRel},
+	&op{"CMP", cmp, amIndY},
 	nil,
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
+	&op{"CMP", cmp, amZpgX},
+	&op{"DEC", dec, amZpgX},
 	nil,
 
 	// 0xd8
 	&op{"CLD", cld, amImpl},
+	&op{"CMP", cmp, amAbsY},
 	nil,
 	nil,
-	nil,
-	nil,
-	nil,
-	nil,
+	&op{"CMP", cmp, amAbsX},
+	&op{"CMP", cmp, amAbsX},
+	&op{"DEC", dec, amAbsX},
 	nil,
 
 	// 0xe0

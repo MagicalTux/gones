@@ -33,3 +33,42 @@ func eor(cpu *Cpu2A03, am AddressMode) {
 	cpu.A ^= v
 	cpu.flagsNZ(cpu.A)
 }
+
+func ror(cpu *Cpu2A03, am AddressMode) {
+	c := byte(0)
+	if cpu.getFlag(FlagCarry) {
+		c = 1
+	}
+
+	if am == amAcc {
+		// act on cpu.A
+		cpu.setFlag(FlagCarry, cpu.A&1 == 1)
+		cpu.A = (cpu.A >> 1) | (c << 7)
+		cpu.flagsNZ(cpu.A)
+	} else {
+		// act on mem
+		addr := am.Addr(cpu)
+		v := cpu.Memory.MemRead(addr)
+
+		cpu.setFlag(FlagCarry, v&1 == 1)
+		v = (v >> 1) | (c << 7)
+		cpu.Memory.MemWrite(addr, v)
+		cpu.flagsNZ(v)
+	}
+}
+
+func lsr(cpu *Cpu2A03, am AddressMode) {
+	if am == amAcc {
+		cpu.setFlag(FlagCarry, cpu.A&1 == 1)
+		cpu.A >>= 1
+		cpu.flagsNZ(cpu.A)
+	} else {
+		addr := am.Addr(cpu)
+		v := cpu.Memory.MemRead(addr)
+
+		cpu.setFlag(FlagCarry, v&1 == 1)
+		v >>= 1
+		cpu.Memory.MemWrite(addr, v)
+		cpu.flagsNZ(v)
+	}
+}

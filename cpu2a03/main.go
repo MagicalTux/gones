@@ -147,14 +147,14 @@ func (cpu *Cpu2A03) Pull() byte {
 
 func (cpu *Cpu2A03) Push16(v uint16) {
 	// TODO is this the right order?
-	cpu.Push(uint8(v & 0xff))
 	cpu.Push(uint8((v >> 8) & 0xff))
+	cpu.Push(uint8(v & 0xff))
 }
 
 func (cpu *Cpu2A03) Pull16() uint16 {
 	var v uint16
-	v = uint16(cpu.Pull()) << 8
-	v |= uint16(cpu.Pull())
+	v = uint16(cpu.Pull())
+	v |= uint16(cpu.Pull()) << 8
 	return v
 }
 

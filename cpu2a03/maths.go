@@ -62,3 +62,11 @@ func sbc(cpu *Cpu2A03, am AddressMode) {
 	cpu.setFlag(FlagCarry, int(a)-int(v)-int(1-c) >= 0)
 	cpu.setFlag(FlagOverflow, (a^v)&0x80 != 0 && (a^cpu.A)&0x80 != 0)
 }
+
+func dec(cpu *Cpu2A03, am AddressMode) {
+	addr := am.Addr(cpu)
+	v := cpu.Memory.MemRead(addr)
+	v -= 1
+	cpu.Memory.MemWrite(addr, v)
+	cpu.flagsNZ(v)
+}
