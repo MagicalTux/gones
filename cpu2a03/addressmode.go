@@ -67,10 +67,10 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		return cpu.Read16W(addr)
 	case amIndX:
 		addr := uint16(cpu.ReadPC() + cpu.X)
-		return cpu.Read16(addr)
+		return cpu.Read16W(addr)
 	case amIndY:
 		addr := uint16(cpu.ReadPC())
-		addr = cpu.Read16(addr)
+		addr = cpu.Read16W(addr)
 		addr2 := addr + uint16(cpu.Y)
 		if addr&0xff00 != addr2&0xff00 {
 			cpu.cyc += 1
