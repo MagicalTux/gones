@@ -283,7 +283,7 @@ var cpu2a03op = [256]*op{
 	&op{"CMP", cmp, amAbsY, 4},
 	&op{"NOP", nop, amImpl, 2},
 	&op{"DCP", dcp, amAbsY, 7},
-	&op{"CMP", cmp, amAbsX, 4},
+	&op{"NOP", nop, amAbsX, 4},
 	&op{"CMP", cmp, amAbsX, 4},
 	&op{"DEC", dec, amAbsX, 7},
 	&op{"DCP", dcp, amAbsX, 7},

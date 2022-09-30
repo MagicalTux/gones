@@ -89,7 +89,7 @@ func (cpu *Cpu2A03) Clock() {
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
 	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
 	if cpu.trace != nil {
-		fmt.Fprintf(cpu.trace, "CPU Step cyc=%d: [$%04x] %s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu))
+		fmt.Fprintf(cpu.trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu)
 	}
 
 	o.f(cpu, o.am)

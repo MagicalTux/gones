@@ -167,10 +167,10 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 		return fmt.Sprintf("ind = ($%04x) = $%04x", addr, cpu.Read16W(addr))
 	case amIndX:
 		addr := cpu.PeekPC()
-		return fmt.Sprintf("ind,X = ($%04x,$%02x) = $%04x", addr, cpu.X, cpu.Read16(uint16(addr+cpu.X)))
+		return fmt.Sprintf("ind,X = ($%02x,$%02x) = $%04x", addr, cpu.X, cpu.Read16(uint16(addr+cpu.X)))
 	case amIndY:
 		addr := uint16(cpu.PeekPC())
-		return fmt.Sprintf("ind,Y = ($%04x),$%02x = $%04x", addr, cpu.Y, cpu.Read16(addr)+uint16(cpu.Y))
+		return fmt.Sprintf("ind,Y = ($%02x),$%02x = $%04x", addr, cpu.Y, cpu.Read16(addr)+uint16(cpu.Y))
 	case amRel:
 		offt := uint16(cpu.PeekPC())
 		if offt&0x80 == 0x80 {
@@ -179,11 +179,11 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 		// add 1 because we used PeekPC instead of ReadPC
 		return fmt.Sprintf("rel = %d = $%04x", int16(offt), cpu.PC+offt+1)
 	case amZpg:
-		return fmt.Sprintf("zpg = $%04x", cpu.PeekPC())
+		return fmt.Sprintf("zpg = $%02x", cpu.PeekPC())
 	case amZpgX:
-		return fmt.Sprintf("zpg,X = $%04x,$%02x", cpu.PeekPC(), cpu.X)
+		return fmt.Sprintf("zpg,X = $%02x,$%02x", cpu.PeekPC(), cpu.X)
 	case amZpgY:
-		return fmt.Sprintf("zpg,Y = $%04x,$%02x", cpu.PeekPC(), cpu.Y)
+		return fmt.Sprintf("zpg,Y = $%02x,$%02x", cpu.PeekPC(), cpu.Y)
 	default:
 		return fmt.Sprintf("unknown $%02x", am)
 	}

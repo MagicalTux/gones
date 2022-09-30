@@ -117,7 +117,7 @@ func slo(cpu *Cpu2A03, am AddressMode) {
 	// M = C <- [76543210] <- 0, A OR M -> A
 	//Flags: N Z C
 
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr) // input M or 0 ?
 
 	cpu.setFlag(FlagCarry, v&0x80 == 0x80)
@@ -143,7 +143,7 @@ func rla(cpu *Cpu2A03, am AddressMode) {
 		c = 1
 	}
 
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 
 	cpu.setFlag(FlagCarry, v&0x80 == 0x80)
@@ -159,7 +159,7 @@ func sre(cpu *Cpu2A03, am AddressMode) {
 	// M = 0 -> [76543210] -> C, A EOR M -> A
 	// Flags: N Z C
 
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 
 	cpu.setFlag(FlagCarry, v&1 == 1)
@@ -180,7 +180,7 @@ func rra(cpu *Cpu2A03, am AddressMode) {
 	}
 
 	// act on mem
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 
 	c2 := v & 1

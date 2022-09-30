@@ -76,7 +76,7 @@ func dec(cpu *Cpu2A03, am AddressMode) {
 func dcp(cpu *Cpu2A03, am AddressMode) {
 	// M - 1 -> M, A - M
 	// Flags: N Z C
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 	v -= 1
 	cpu.Memory.MemWrite(addr, v)
@@ -90,7 +90,7 @@ func isc(cpu *Cpu2A03, am AddressMode) {
 	// M + 1 -> M, A - M - C -> A
 	// Flags: N Z C V
 
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 
 	v += 1
