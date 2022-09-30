@@ -43,9 +43,23 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 	case amAbs:
 		return cpu.ReadPC16()
 	case amAbsX:
-		return cpu.ReadPC16() + uint16(cpu.X)
+		// if page crossed add 1 cycle
+		addr := cpu.ReadPC16()
+		addr2 := addr + uint16(cpu.X)
+		if addr&0xff00 != addr2&0xff00 {
+			// different page
+			cpu.cyc += 1
+		}
+		return addr2
 	case amAbsY:
-		return cpu.ReadPC16() + uint16(cpu.Y)
+		// if page crossed add 1 cycle
+		addr := cpu.ReadPC16()
+		addr2 := addr + uint16(cpu.Y)
+		if addr&0xff00 != addr2&0xff00 {
+			// different page
+			cpu.cyc += 1
+		}
+		return addr2
 	case amImmed:
 		panic("amImmed.Addr()")
 	case amInd:
@@ -56,7 +70,12 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		return cpu.Read16(addr)
 	case amIndY:
 		addr := uint16(cpu.ReadPC())
-		return cpu.Read16(addr) + uint16(cpu.Y)
+		addr = cpu.Read16(addr)
+		addr2 := addr + uint16(cpu.Y)
+		if addr&0xff00 != addr2&0xff00 {
+			cpu.cyc += 1
+		}
+		return addr2
 	case amRel:
 		offt := uint16(cpu.ReadPC())
 		if offt&0x80 == 0x80 {

@@ -1,70 +1,69 @@
 package cpu2a03
 
-/*
-MNEMONIC                       HEX
-BPL (Branch on PLus)           $10
-BMI (Branch on MInus)          $30
-BVC (Branch on oVerflow Clear) $50
-BVS (Branch on oVerflow Set)   $70
-BCC (Branch on Carry Clear)    $90
-BCS (Branch on Carry Set)      $B0
-BNE (Branch on Not Equal)      $D0
-BEQ (Branch on EQual)          $F0
-*/
+// branchTo branches execution to the given address while accounting for cycles
+func (cpu *Cpu2A03) branchTo(addr uint16) {
+	if cpu.PC&0xff00 != addr&0xff00 {
+		// different page
+		cpu.cyc += 2
+	} else {
+		cpu.cyc += 1
+	}
+	cpu.PC = addr
+}
 
 func bpl(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagNegative == 0 {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func bmi(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagNegative == FlagNegative {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func bvc(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagOverflow == 0 {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func bvs(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagOverflow == FlagOverflow {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func bcc(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagCarry == 0 {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func bcs(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagCarry == FlagCarry {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func bne(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagZero == 0 {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 
 func beq(cpu *Cpu2A03, am AddressMode) {
 	addr := am.Addr(cpu)
 	if cpu.P&FlagZero == FlagZero {
-		cpu.PC = addr
+		cpu.branchTo(addr)
 	}
 }
 

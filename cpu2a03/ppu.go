@@ -18,10 +18,21 @@ type PPU struct {
 	scroll  byte
 	addr    byte
 	data    byte
+
+	x, y uint16
+}
+
+func (p *PPU) Reset(cnt uint64) {
+	// cnt tells us at what point we need to reset, typically 7
+	pxls := cnt * 3 // =21
+
+	p.x = 0
+	p.y = uint16(pxls)
 }
 
 func (p *PPU) Clock(cnt int) {
 	// move clock forward by cnt (1 CPU clock = 3 PPU clock)
+	p.y += uint16(cnt * 3)
 }
 
 func (p *PPU) MemRead(offset uint16) byte {

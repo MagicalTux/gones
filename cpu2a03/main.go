@@ -22,6 +22,8 @@ type Cpu2A03 struct {
 	fault  bool
 
 	trace *os.File
+	cyc   uint64
+	clk   uint64
 }
 
 func New() *Cpu2A03 {
@@ -70,6 +72,12 @@ func (cpu *Cpu2A03) Clock() {
 	if cpu.fault {
 		return
 	}
+	cpu.clk += 1
+	if cpu.clk < cpu.cyc {
+		// wait for clock to catch up
+		return
+	}
+
 	pos := cpu.PC
 	// read value at PC
 	e := cpu.ReadPC()
@@ -81,13 +89,16 @@ func (cpu *Cpu2A03) Clock() {
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
 	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
 	if cpu.trace != nil {
-		fmt.Fprintf(cpu.trace, "CPU Step: [$%04x] %s %s\n", pos, o.i, o.am.Debug(cpu))
+		fmt.Fprintf(cpu.trace, "CPU Step cyc=%d: [$%04x] %s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu))
 	}
 
 	o.f(cpu, o.am)
 
+	cyc := int(o.cyc)
+	cpu.cyc += uint64(cyc)
+
 	// move PPU forward
-	cpu.PPU.Clock(3)
+	cpu.PPU.Clock(cyc * 3)
 }
 
 func (cpu *Cpu2A03) Reset() {
@@ -98,8 +109,13 @@ func (cpu *Cpu2A03) Reset() {
 	cpu.S = 0xff
 	cpu.P = 0
 
+	cpu.cyc = 7 // cpu init typically takes 7 cycles
+	cpu.clk = 7 // which is already done
+
 	// $FFFC-$FFFD = Reset vector
 	cpu.PC = cpu.Read16(0xfffc)
+
+	cpu.PPU.Reset(cpu.cyc)
 
 	log.Printf("CPU reset, new state = %s", cpu)
 }
