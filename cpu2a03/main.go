@@ -24,6 +24,7 @@ type Cpu2A03 struct {
 	P    byte   // status register
 
 	Memory    memory.Master
+	Input     [2]InputDevice
 	PPU       *ppu.PPU
 	APU       *APU
 	fault     bool
@@ -40,8 +41,8 @@ func New() *Cpu2A03 {
 		APU:    &APU{},
 	}
 	cpu.PPU = ppu.New()
-	cpu.APU.cpu = cpu
 	cpu.PPU.VblankInterrupt(cpu.NMI) // connect PPU's vblank to NMI
+	cpu.APU.cpu = cpu
 
 	trace, err := os.Create("trace_2a03.txt")
 	if err == nil {
