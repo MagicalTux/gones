@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/ppu"
 )
 
 const (
@@ -23,7 +24,7 @@ type Cpu2A03 struct {
 	P    byte   // status register
 
 	Memory    memory.Master
-	PPU       *PPU
+	PPU       *ppu.PPU
 	APU       *APU
 	fault     bool
 	interrupt byte
@@ -38,8 +39,9 @@ func New() *Cpu2A03 {
 		Memory: memory.NewBus(),
 		APU:    &APU{},
 	}
-	cpu.PPU = NewPPU(cpu)
+	cpu.PPU = ppu.New()
 	cpu.APU.cpu = cpu
+	cpu.PPU.VblankInterrupt(cpu.NMI) // connect PPU's vblank to NMI
 
 	trace, err := os.Create("trace_2a03.txt")
 	if err == nil {

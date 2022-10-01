@@ -1,17 +1,17 @@
-package cpu2a03
+package ppu
 
 import (
 	"log"
 	"unsafe"
 
 	"github.com/MagicalTux/gones/memory"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // https://www.nesdev.org/wiki/PPU_rendering#Frame_timing_diagram
 // The PPU renders 262 scanlines per frame. Each scanline lasts for 341 PPU clock cycles (113.667 CPU clock cycles; 1 CPU cycle = 3 PPU cycles), with each clock cycle producing one pixel.
 
 type PPU struct {
-	cpu    *Cpu2A03
 	Memory memory.Master
 
 	ctrl    byte // 0x00 at start
@@ -23,12 +23,16 @@ type PPU struct {
 	data    byte
 
 	x, y uint16
+
+	front, back *ebiten.Image
+	vblank      func()
 }
 
-func NewPPU(cpu *Cpu2A03) *PPU {
+func New() *PPU {
 	ppu := &PPU{
-		cpu:    cpu,
 		Memory: memory.NewBus(),
+		front:  ebiten.NewImage(256, 240),
+		back:   ebiten.NewImage(256, 240),
 	}
 
 	// https://www.nesdev.org/wiki/PPU_memory_map
@@ -43,6 +47,10 @@ func NewPPU(cpu *Cpu2A03) *PPU {
 	ppu.Memory.MapHandler(0x3f00, 0x100, memory.NewRAM(32))
 
 	return ppu
+}
+
+func (p *PPU) VblankInterrupt(cb func()) {
+	p.vblank = cb
 }
 
 func (p *PPU) Reset(cnt uint64) {
