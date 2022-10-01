@@ -41,7 +41,7 @@ func (p *APU) MemWrite(offset uint16, val byte) byte {
 			dev.Write(val)
 		}
 	default:
-		log.Printf("Unhandled APU write: $%04x = %d", offset, val)
+		log.Printf("Unhandled APU write: $%04x = $%02x", offset, val)
 	}
 	return 0
 }

@@ -50,6 +50,7 @@ func main() {
 	}
 
 	log.Printf("CPU ready with memory: %s", cpu.Memory)
+	log.Printf("PPU ready with memory: %s", cpu.PPU.Memory)
 
 	cpu.Reset()
 	go cpu.Start(cpu2a03.NTSC)
