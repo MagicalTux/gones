@@ -3,6 +3,7 @@ package cartridge
 import (
 	"os"
 
+	"github.com/MagicalTux/gones/memory"
 	"golang.org/x/sys/unix"
 )
 
@@ -41,9 +42,10 @@ func (d *Data) PRG() []byte {
 	return d.m[offt : offt+romSize]
 }
 
-func (d *Data) CHR() []byte {
+func (d *Data) CHR() memory.Handler {
 	if d.numCHR == 0 {
-		return nil
+		// 5: Size of CHR ROM in 8 KB units (Value 0 means the board uses CHR RAM)
+		return memory.NewRAM(0x2000)
 	}
 
 	// get CHR data
@@ -57,5 +59,5 @@ func (d *Data) CHR() []byte {
 
 	romSize = int(d.numCHR) << 13 // 1=8kB, ...
 
-	return d.m[offt : offt+romSize]
+	return memory.ROM(d.m[offt : offt+romSize])
 }

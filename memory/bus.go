@@ -51,14 +51,17 @@ func (b Bus) MemRead(offset uint16) byte {
 func (b Bus) MemWrite(offset uint16, val byte) byte {
 	offt := offset >> 8
 	var res byte
+	var cnt int
 
 	for _, h := range b[offt] {
 		res = h.MemWrite(offset, val)
-		if res != val && res != 0 {
-			// see: https://www.nesdev.org/wiki/Bus_conflict
-			// We don't overwrite val with this yet, but we might if it is required
-			log.Printf("Bus conflict at address $%04x! Write=$%02x but got bits $%02x", offset, val, res)
-		}
+		cnt += 1
+	}
+	if res != val && cnt > 1 && res != 0 {
+		// see: https://www.nesdev.org/wiki/Bus_conflict
+		// We don't overwrite val with this yet, but we might if it is required
+		// do not show a warning if only 1 device, because it could be a ROM that someone is trying to write to
+		log.Printf("Bus conflict at address $%04x! Write=$%02x but got bits $%02x", offset, val, res)
 	}
 	return res
 }

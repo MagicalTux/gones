@@ -31,11 +31,13 @@ func (m *MapperNROM) Setup(cpu *cpu2a03.Cpu2A03) error {
 	rom := memory.ROM(m.data.PRG())
 	cpu.Memory.MapHandler(0x8000, 0x8000, rom)
 
-	if chr := m.data.CHR(); len(chr) > 0 {
+	if chr := m.data.CHR(); chr != nil {
 		// We have a CHR table, map it to the PPU
-		rom = memory.ROM(chr)
-		cpu.PPU.Memory.MapHandler(0x0000, 0x2000, rom)
+		cpu.PPU.Memory.MapHandler(0x0000, 0x2000, chr)
 	}
+
+	// ignore numPRGram since value 0 means a 8kB RAM, value 1 means a 8kB ram, and higher values can't be addressed
+	cpu.PPU.Memory.MapHandler(0x6000, 0x2000, memory.NewRAM(0x2000)) // 8kB ram
 
 	log.Printf("TEST ROM 0x00 = $%02x", m.data.PRG()[0])
 	log.Printf("TEST ROM 0x00 = $%02x", rom.MemRead(0))
