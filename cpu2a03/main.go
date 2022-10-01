@@ -87,7 +87,7 @@ func (cpu *Cpu2A03) Clock() {
 		return
 	}
 
-	if cpu.interrupt != InterruptNone {
+	if cpu.interrupt == InterruptNMI || (cpu.interrupt == InterruptIRQ && !cpu.getFlag(FlagInterruptDisable)) {
 		cpu.handleInterrupt()
 		cpu.interrupt = InterruptNone
 	}

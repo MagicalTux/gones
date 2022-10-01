@@ -47,6 +47,19 @@ func (m *MMU) MapHandler(offset, length uint16, h Handler) {
 	}
 }
 
+func (m *MMU) ClearMapping(offset, length uint16) {
+	offt := offset >> PageBits
+	cnt := length >> PageBits
+	if length%PageBits != 0 {
+		cnt += 1
+	}
+
+	for i := uint16(0); i < cnt; i++ {
+		m.direct[offt+i] = nil
+		m.indirect[offt+i] = nil
+	}
+}
+
 func (m *MMU) MapAnonymous(offset uint16, ln uint16) {
 	ram := make([]byte, ln)
 	m.Map(offset, ram)

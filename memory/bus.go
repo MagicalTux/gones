@@ -25,6 +25,18 @@ func (b *Bus) MapHandler(offset uint16, length uint16, h Handler) {
 	}
 }
 
+func (b *Bus) ClearMapping(offset, length uint16) {
+	offt := offset >> 8
+	cnt := length >> 8
+	if length%0x100 != 0 {
+		cnt += 1
+	}
+
+	for i := uint16(0); i < cnt; i++ {
+		b[offt+i] = nil
+	}
+}
+
 func (b Bus) MemRead(offset uint16) byte {
 	offt := offset >> 8
 	var res byte

@@ -9,4 +9,5 @@ type Handler interface {
 type Master interface {
 	Handler
 	MapHandler(offset uint16, length uint16, h Handler)
+	ClearMapping(offset, length uint16)
 }

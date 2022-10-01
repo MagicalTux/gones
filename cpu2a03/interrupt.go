@@ -13,7 +13,7 @@ func (cpu *Cpu2A03) NMI() {
 }
 
 func (cpu *Cpu2A03) IRQ() {
-	if !cpu.getFlag(FlagInterruptDisable) {
+	if cpu.interrupt == InterruptNone {
 		cpu.interrupt = InterruptIRQ
 	}
 }
