@@ -190,6 +190,19 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 	}
 }
 
+func (am AddressMode) Length() int {
+	switch am {
+	case amAcc, amImpl:
+		return 0
+	case amImmed, amIndX, amIndY, amRel, amZpg, amZpgX, amZpgY:
+		return 1
+	case amAbs, amAbsX, amAbsY, amInd:
+		return 2
+	default:
+		return 0
+	}
+}
+
 func (am AddressMode) Implied(cpu *Cpu2A03) {
 	if am == amImpl {
 		return
