@@ -54,8 +54,8 @@ type PPU struct {
 	spritePriorities [8]byte
 	spriteIndexes    [8]byte
 
-	front, back *image.RGBA
-	vblank      func()
+	front, back     *image.RGBA
+	VBlankInterrupt func()
 
 	sync chan *image.RGBA
 }
@@ -81,10 +81,6 @@ func New() *PPU {
 	ppu.Memory.MapHandler(0x2000, 0x2000, ppu.nameTableMemory)
 
 	return ppu
-}
-
-func (p *PPU) VblankInterrupt(cb func()) {
-	p.vblank = cb
 }
 
 func (p *PPU) Reset(cnt uint64) {
@@ -186,9 +182,9 @@ func (p *PPU) checkPendingNMI() {
 	// check if we have any pending NMI, and send it
 	if p.vblankNMI && p.getFlag(GenerateNMI) {
 		p.vblankNMI = false
-		if p.vblank != nil {
+		if f := p.VBlankInterrupt; f != nil {
 			// trigger vblank interrupt
-			p.vblank()
+			f()
 		}
 	}
 }

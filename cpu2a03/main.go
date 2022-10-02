@@ -38,7 +38,7 @@ func New() *Cpu2A03 {
 		Memory: memory.NewBus(),
 	}
 	cpu.PPU = ppu.New()
-	cpu.PPU.VblankInterrupt(cpu.NMI)              // connect PPU's vblank to NMI
+	cpu.PPU.VBlankInterrupt = cpu.NMI             // connect PPU's vblank to NMI
 	cpu.APU = apu.New(cpu.Memory, cpu.timeFreeze) // APU has access to the cpu's memory & clock
 	cpu.Input = cpu.APU.Input[:]
 	cpu.APU.Interrupt = cpu.IRQ

@@ -2,7 +2,7 @@
 
 NES emulator using ebitengine.
 
-PPU & APU are based on [Michael Fogleman's emulator](https://github.com/fogleman/nes), with added/removed bugs and more rewrites planned/needed.
+PPU & APU are based on [Michael Fogleman's emulator](https://github.com/fogleman/nes), with added/removed bugs and more rewrites planned/needed. Because the CPU and the memory code isn't the same, the code isn't the same either, and I'm hoping to fully rewrite it eventually.
 
 MOS 6502 CPU is mostly implemented from scratch.
 
