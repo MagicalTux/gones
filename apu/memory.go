@@ -21,6 +21,14 @@ func (apu *APU) MemRead(offset uint16) byte {
 		}
 		return 0
 	default:
+		if offset < 0x15 {
+			// https://github.com/quackenbush/nestalgia/blob/master/docs/apu/nessound.txt
+			// Note that $4015 is the only R/W register. All others are write only (attempt
+			// to read them will most likely result in a returned 040H, due to heavy
+			// capacitance on the NES's data bus). Reading a "write only" register, will
+			// have no effect on the specific register, or channel.
+			return 0x40
+		}
 		log.Printf("Unhandled APU read: $%04x", offset)
 	}
 	return 0

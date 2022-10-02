@@ -53,6 +53,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+var zoom = flag.Int("zoom", 4, "zoom level for display")
 
 func main() {
 	flag.Parse()
@@ -91,7 +92,7 @@ func main() {
 	log.Printf("CPU ready with memory: %s", cpu.Memory)
 	log.Printf("PPU ready with memory: %s", cpu.PPU.Memory)
 
-	ebiten.SetWindowSize(256*2, 240*2)
+	ebiten.SetWindowSize(256*(*zoom), 240*(*zoom))
 	ebiten.SetWindowTitle("goNES")
 
 	game := &Game{
