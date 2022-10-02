@@ -178,6 +178,8 @@ func ane(cpu *Cpu2A03, am AddressMode) {
 }
 
 func lxa(cpu *Cpu2A03, am AddressMode) {
+	// Opcode AB
+	// also known as OAL or ATX
 	// Store * AND oper in A and X
 	// Highly unstable, involves a 'magic' constant, see ANE
 	// (A OR CONST) AND oper -> A -> X
@@ -185,10 +187,16 @@ func lxa(cpu *Cpu2A03, am AddressMode) {
 	// This opcode ORs the A register with #xx, ANDs the result with an immediate
 	// value, and then stores the result in both A and X.
 
+	// ORA #$EE
+	// AND #$AA
+	// TAX
+
 	// Flags: N Z
 
+	// http://visual6502.org/JSSim/expert.html?graphics=f&steps=12&a=5555&d=44&a=0&d=a9ffab88&loglevel=2&logmore=dpc3_SBX,dpc23_SBAC,plaOutputs,DPControl
+
 	// Let's use the same constant as for ANE
-	cpu.A = (cpu.A | 0xee) & am.Read(cpu)
+	cpu.A = cpu.A & am.Read(cpu)
 	cpu.X = cpu.A
 	cpu.flagsNZ(cpu.A)
 }
@@ -241,4 +249,15 @@ func sbx(cpu *Cpu2A03, am AddressMode) {
 	cpu.X = a - v
 
 	cpu.compare(a, v)
+}
+
+func shy(cpu *Cpu2A03, am AddressMode) {
+	// Opcode 9C
+	// Also known as: A11, SYA, SAY
+	// Stores Y AND (high-byte of addr. + 1) at addr.
+	// unstable: sometimes 'AND (H+1)' is dropped, page boundary crossings may not work (with the high-byte of the value used as the high-byte of the address)
+	// Y AND (H+1) -> M
+
+	addr := am.Addr(cpu)
+	cpu.Memory.MemWrite(addr, cpu.Y&uint8((addr>>8)+1))
 }
