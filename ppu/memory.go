@@ -76,7 +76,7 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 	case PPUSCROLL:
 		// PPUSCROLL and PPUADDR share registers, see https://www.nesdev.org/wiki/PPU_scrolling#Register_controls
 		if !p.W {
-			p.T = (p.T & 0xffe0) | (uint16(val) >> 3)
+			p.T = uint16(val) >> 3
 			p.X = val & 0x07
 			p.W = true
 		} else {
@@ -87,7 +87,7 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 		return 0
 	case PPUADDR:
 		if !p.W {
-			p.T = (p.T & 0x80ff) | ((uint16(val) & 0x3f) << 8)
+			p.T = (uint16(val) & 0x3f) << 8
 			p.W = true
 		} else {
 			p.T = (p.T & 0xFF00) | uint16(val)
