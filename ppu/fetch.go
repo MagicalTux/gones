@@ -16,9 +16,12 @@ func (p *PPU) fetchAttributeTableByte() {
 
 func (p *PPU) currentTileAddress() uint16 {
 	fineY := (p.V >> 12) & 7
-	table := p.ctrl & NameTableMask // 0, 1, 2, 3
+	var table uint16
+	if p.getFlag(AltBackground) {
+		table = 0x1000
+	}
 	tile := p.nameTableByte
-	return (uint16(table) << 12) | (uint16(tile) << 4) | fineY
+	return table | (uint16(tile) << 4) | fineY
 }
 
 func (p *PPU) fetchLowTileByte() {
