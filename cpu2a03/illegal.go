@@ -150,15 +150,14 @@ func arr(cpu *Cpu2A03, am AddressMode) {
 	cpu.A &= v
 
 	// something like that?
-	cpu.setFlag(FlagOverflow, ((cpu.A>>7)^(cpu.A>>6)) == 1)
+	cpu.setFlag(FlagOverflow, ((cpu.A>>7&1)^(cpu.A>>6&1)) == 1)
 
 	c := byte(0)
 	if cpu.getFlag(FlagCarry) {
 		c = 1
 	}
 
-	// act on A
-
+	// Update A
 	cpu.setFlag(FlagCarry, cpu.A&0x80 == 0x80) // "The state of bit 7 is exchanged with the carry flag." ?
 	cpu.A = (cpu.A >> 1) | (c << 7)
 	cpu.flagsNZ(cpu.A)
