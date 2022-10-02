@@ -102,8 +102,13 @@ func rol(cpu *Cpu2A03, am AddressMode) {
 		cpu.flagsNZ(cpu.A)
 	} else {
 		// act on mem
-		addr := am.Addr(cpu)
+		addr := am.AddrFast(cpu)
 		v := cpu.Memory.MemRead(addr)
+
+		// re-write the original value as per 6502
+		// See: https://www.nesdev.org/6502_cpu.txt
+		// → "Read-Modify-Write instructions"
+		cpu.Memory.MemWrite(addr, v)
 
 		cpu.setFlag(FlagCarry, v&0x80 == 0x80)
 		v = (v << 1) | c

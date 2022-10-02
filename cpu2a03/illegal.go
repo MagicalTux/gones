@@ -258,6 +258,29 @@ func shy(cpu *Cpu2A03, am AddressMode) {
 	// unstable: sometimes 'AND (H+1)' is dropped, page boundary crossings may not work (with the high-byte of the value used as the high-byte of the address)
 	// Y AND (H+1) -> M
 
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	cpu.Memory.MemWrite(addr, cpu.Y&uint8((addr>>8)+1))
+}
+
+func tas(cpu *Cpu2A03, am AddressMode) {
+	// Opcode 9B
+	// Also known as XAS, SHS
+	// Puts A AND X in SP and stores A AND X AND (high-byte of addr. + 1) at addr.
+	// unstable: sometimes 'AND (H+1)' is dropped, page boundary crossings may not work (with the high-byte of the value used as the high-byte of the address)
+	// A AND X -> SP, A AND X AND (H+1) -> M
+
+	addr := am.AddrFast(cpu)
+	cpu.S = cpu.A & cpu.X
+	cpu.Memory.MemWrite(addr, cpu.A&cpu.X&uint8((addr>>8)+1))
+}
+
+func shx(cpu *Cpu2A03, am AddressMode) {
+	// Opcode 9E
+	// Also known as A11, SXA, XAS
+	// Stores X AND (high-byte of addr. + 1) at addr.
+	// unstable: sometimes 'AND (H+1)' is dropped, page boundary crossings may not work (with the high-byte of the value used as the high-byte of the address)
+	// X AND (H+1) -> M
+
+	addr := am.AddrFast(cpu)
+	cpu.Memory.MemWrite(addr, cpu.X&uint8((addr>>8)+1))
 }

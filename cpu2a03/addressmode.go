@@ -1,6 +1,8 @@
 package cpu2a03
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /*
 A	Accumulator	OPC A	operand is AC (implied single byte instruction)
@@ -48,7 +50,8 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		addr := cpu.ReadPC16()
 		addr2 := addr + uint16(cpu.X)
 		if addr&0xff00 != addr2&0xff00 {
-			// different page
+			// different page, lose one cycle due to dummy read
+			cpu.Memory.MemRead((addr & 0xff00) | (addr2 & 0xff)) // dummy read
 			cpu.cyc += 1
 		}
 		return addr2
@@ -57,7 +60,8 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		addr := cpu.ReadPC16()
 		addr2 := addr + uint16(cpu.Y)
 		if addr&0xff00 != addr2&0xff00 {
-			// different page
+			// different page, lose one cycle due to dummy read
+			cpu.Memory.MemRead((addr & 0xff00) | (addr2 & 0xff)) // dummy read
 			cpu.cyc += 1
 		}
 		return addr2
@@ -74,6 +78,8 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 		addr = cpu.Read16W(addr)
 		addr2 := addr + uint16(cpu.Y)
 		if addr&0xff00 != addr2&0xff00 {
+			// different page, lose one cycle due to dummy read
+			cpu.Memory.MemRead((addr & 0xff00) | (addr2 & 0xff)) // dummy read
 			cpu.cyc += 1
 		}
 		return addr2
@@ -97,11 +103,20 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 func (am AddressMode) AddrFast(cpu *Cpu2A03) uint16 {
 	switch am {
 	case amAbsX:
-		return cpu.ReadPC16() + uint16(cpu.X)
+		addr := cpu.ReadPC16()
+		addr2 := addr + uint16(cpu.X)
+		cpu.Memory.MemRead((addr & 0xff00) | (addr2 & 0xff)) // pre-write read
+		return addr2
 	case amAbsY:
-		return cpu.ReadPC16() + uint16(cpu.Y)
+		addr := cpu.ReadPC16()
+		addr2 := addr + uint16(cpu.Y)
+		cpu.Memory.MemRead((addr & 0xff00) | (addr2 & 0xff)) // pre-write read
+		return addr2
 	case amIndY:
-		return cpu.Read16W(uint16(cpu.ReadPC())) + uint16(cpu.Y)
+		addr := cpu.Read16W(uint16(cpu.ReadPC()))
+		addr2 := addr + uint16(cpu.Y)
+		cpu.Memory.MemRead((addr & 0xff00) | (addr2 & 0xff)) // pre-write read
+		return addr2
 	default:
 		return am.Addr(cpu)
 	}

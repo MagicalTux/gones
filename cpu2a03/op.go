@@ -202,10 +202,10 @@ var cpu2a03op = [256]*op{
 	&op{"TYA", tya, amImpl, 2},
 	&op{"STA", sta, amAbsY, 5},
 	&op{"TXS", txs, amImpl, 2},
-	nil, // 5
+	&op{"TAS", tas, amAbsY, 5},
 	&op{"SHY", shy, amAbsX, 5},
 	&op{"STA", sta, amAbsX, 5},
-	nil, // 5
+	&op{"SHX", shx, amAbsY, 5},
 	&op{"SHA", sha, amAbsY, 5},
 
 	// 0xa0
