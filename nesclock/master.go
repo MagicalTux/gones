@@ -12,14 +12,15 @@ const (
 	NTSC = 21477470 // 21.47727 MHz (NTSC) 21.477272 MHz ± 40 Hz
 	PAL  = 26601700 // 26.6017 MHz (PAL) 26.601712 MHz ± 50 Hz
 
-	StdMul = 25
+	// Clock: requested 21477470 Hz clock, computed clock will be 21477663 Hz (25 steps/1.164µs interval, a 193Hz diff)
+	// Clock: requested 26601700 Hz clock, computed clock will be 26601723 Hz (71 steps/2.669µs interval, a 23Hz diff)
 )
 
 type ClockInput func(uint64) uint64
 
 type Master struct {
 	freq uint64        // number of clocks per second
-	mul  uint64        // hz per cycle
+	step uint64        // hz per cycle
 	intv time.Duration // duration of a cycle
 	pos  uint64        // clocks so far
 	now  time.Time
@@ -28,18 +29,46 @@ type Master struct {
 }
 
 // New returns a new clock running at the given frequency, using the specified
-// mul value as increment value. Higher mul values means more calls will happen
-// in batches, but improves how close this will run to real time.
-func New(freq, mul uint64) *Master {
-	// compute nanoseconds for `mul` Hz
-	intv := time.Second * time.Duration(mul) / time.Duration(freq)
-	realFreq := uint64(time.Second * time.Duration(mul) / intv)
+// step value as increment value. Higher step values means more calls will
+// happen in batches, but improves how close this will run to real time.
+func New(freq uint64) *Master {
+	step := uint64(1)
 
-	log.Printf("Clock: requested %d Hz clock, computed clock will be %d Hz (%d pulses/%s interval, a %01.6f%% diff)", freq, realFreq, mul, intv, float64(realFreq-freq)/float64(freq)*100)
+	var intv time.Duration
+	var realFreq, diff, bestStep, bestDiff uint64
+
+	for ; step < 100; step++ {
+		// compute nanoseconds for a step
+		intv = time.Second * time.Duration(step) / time.Duration(freq)
+		realFreq = uint64(time.Second * time.Duration(step) / intv)
+
+		if realFreq > freq {
+			diff = realFreq - freq
+		} else {
+			diff = freq - realFreq
+		}
+
+		if bestStep == 0 || diff < bestDiff {
+			bestStep = step
+			bestDiff = diff
+		}
+	}
+	step = bestStep
+
+	// compute nanoseconds for a step
+	intv = time.Second * time.Duration(step) / time.Duration(freq)
+	realFreq = uint64(time.Second * time.Duration(step) / intv)
+	if realFreq > freq {
+		diff = realFreq - freq
+	} else {
+		diff = freq - realFreq
+	}
+
+	log.Printf("Clock: requested %d Hz clock, computed clock will be %d Hz (%d steps/%s interval, a %dHz diff)", freq, realFreq, step, intv, diff)
 
 	res := &Master{
 		freq: freq,
-		mul:  mul,
+		step: step,
 		intv: intv,
 		now:  time.Now(),
 	}
@@ -88,9 +117,9 @@ func (m *Master) thread() {
 
 			// how long to sleep until cur > nextRun?
 			sleepHz := (cur.nextRun - pos)
-			sleepCycles := sleepHz / m.mul
+			sleepCycles := sleepHz / m.step
 			// if not round, add 1
-			if sleepHz%m.mul != 0 {
+			if sleepHz%m.step != 0 {
 				sleepCycles += 1
 			}
 			// convert to time duration
@@ -103,7 +132,7 @@ func (m *Master) thread() {
 			} else {
 				// convert eslap back into time unit
 				timCycles := uint64(eslap / m.intv)
-				pos += timCycles * m.mul
+				pos += timCycles * m.step
 				m.now = m.now.Add(time.Duration(timCycles) * m.intv)
 			}
 			atomic.StoreUint64(&m.pos, pos)

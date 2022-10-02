@@ -12,9 +12,9 @@ const (
 func (m Model) clock() *nesclock.Master {
 	switch m {
 	case NTSC:
-		return nesclock.New(nesclock.NTSC, nesclock.StdMul)
+		return nesclock.New(nesclock.NTSC)
 	case PAL:
-		return nesclock.New(nesclock.PAL, nesclock.StdMul)
+		return nesclock.New(nesclock.PAL)
 	default:
 		panic("invalid model")
 	}

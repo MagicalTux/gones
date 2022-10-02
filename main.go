@@ -46,8 +46,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.img.WritePixels(img.Pix)
 	})
 	screen.DrawImage(g.img, nil)
-	//screen.DrawImage(g.cpu.PPU.Front(), nil)
-	//ebitenutil.DebugPrint(screen, "Hello, World!")
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
