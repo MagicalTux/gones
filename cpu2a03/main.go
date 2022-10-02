@@ -7,6 +7,7 @@ import (
 
 	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/nesclock"
 	"github.com/MagicalTux/gones/ppu"
 )
 
@@ -24,6 +25,7 @@ type Cpu2A03 struct {
 	P    byte   // status register
 
 	Memory    memory.Master
+	Clk       *nesclock.Master
 	PPU       *ppu.PPU
 	APU       *apu.APU
 	Input     []apu.InputDevice
@@ -36,6 +38,7 @@ type Cpu2A03 struct {
 func New() *Cpu2A03 {
 	cpu := &Cpu2A03{
 		Memory: memory.NewBus(),
+		Clk:    nesclock.New(nesclock.NTSC, nesclock.StdMul),
 	}
 	cpu.PPU = ppu.New()
 	cpu.PPU.VBlankInterrupt = cpu.NMI             // connect PPU's vblank to NMI
