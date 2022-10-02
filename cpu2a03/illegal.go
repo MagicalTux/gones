@@ -226,7 +226,7 @@ func sha(cpu *Cpu2A03, am AddressMode) {
 	// A AND X AND (H+1) -> M
 	// Flags: none
 
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.A & cpu.X & uint8(addr>>8)
 	cpu.Memory.MemWrite(addr, v)
 }

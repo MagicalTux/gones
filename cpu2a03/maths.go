@@ -58,7 +58,7 @@ func sbc(cpu *Cpu2A03, am AddressMode) {
 }
 
 func inc(cpu *Cpu2A03, am AddressMode) {
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 	v += 1
 	cpu.Memory.MemWrite(addr, v)
@@ -66,7 +66,7 @@ func inc(cpu *Cpu2A03, am AddressMode) {
 }
 
 func dec(cpu *Cpu2A03, am AddressMode) {
-	addr := am.Addr(cpu)
+	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 	v -= 1
 	cpu.Memory.MemWrite(addr, v)

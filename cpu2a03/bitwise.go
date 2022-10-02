@@ -47,7 +47,7 @@ func ror(cpu *Cpu2A03, am AddressMode) {
 		cpu.flagsNZ(cpu.A)
 	} else {
 		// act on mem
-		addr := am.Addr(cpu)
+		addr := am.AddrFast(cpu)
 		v := cpu.Memory.MemRead(addr)
 
 		cpu.setFlag(FlagCarry, v&1 == 1)
@@ -63,7 +63,7 @@ func lsr(cpu *Cpu2A03, am AddressMode) {
 		cpu.A >>= 1
 		cpu.flagsNZ(cpu.A)
 	} else {
-		addr := am.Addr(cpu)
+		addr := am.AddrFast(cpu)
 		v := cpu.Memory.MemRead(addr)
 
 		cpu.setFlag(FlagCarry, v&1 == 1)
@@ -79,7 +79,7 @@ func asl(cpu *Cpu2A03, am AddressMode) {
 		cpu.A <<= 1
 		cpu.flagsNZ(cpu.A)
 	} else {
-		addr := am.Addr(cpu)
+		addr := am.AddrFast(cpu)
 		v := cpu.Memory.MemRead(addr)
 
 		cpu.setFlag(FlagCarry, v&0x80 == 0x80)
