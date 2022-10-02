@@ -59,7 +59,15 @@ func New(m Model) *Cpu2A03 {
 // go cpu.Start(cpu2a03.NTSC)
 func (cpu *Cpu2A03) Start() {
 	// trigger once every 12 clocks (if NTSC)
-	cpu.Clk.Listen(cpu.model.cpuIntv(), cpu.clock)
+	cpu.Clk.Listen(cpu.model.cpuIntv(), 0, cpu.clock)
+
+	// ppu & apu are run with a offset of 1 to ensure they run after the cpu
+	cpu.Clk.Listen(cpu.model.ppuIntv(), 1, cpu.PPU.Clock)
+
+	// apu needs 3 clocks
+	cpu.Clk.Listen(cpu.model.cpuIntv(), 1, cpu.APU.ClockCPU)
+	cpu.Clk.Listen(cpu.Clk.Frequency()/240, 1, cpu.APU.Clock240)
+	cpu.Clk.Listen(cpu.Clk.Frequency()/44100, 1, cpu.APU.Clock44100)
 }
 
 func (cpu *Cpu2A03) clock(uint64) uint64 {
@@ -91,11 +99,6 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	cpu.cyc += uint64(o.cyc)
 
 	cycdelta := cpu.cyc - cycstart
-
-	// move PPU forward
-	cpu.PPU.Clock(cycdelta)
-	// move APU forward
-	cpu.APU.Clock(cycdelta)
 
 	// number of cycles we've consumed in this run
 	return cycdelta

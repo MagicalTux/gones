@@ -94,19 +94,16 @@ func (p *PPU) Reset(cnt uint64) {
 	p.frame = 0
 }
 
-func (p *PPU) Clock(cnt uint64) {
+func (p *PPU) Clock(cnt uint64) uint64 {
 	p.checkPendingNMI()
 
 	if cnt == 0 {
 		// should not happen
-		return
+		return 0
 	}
 
 	// read some status stuff
 	renderEnabled := p.getMask(ShowBg) || p.getMask(ShowSprites)
-
-	// 1 CPU clock = 3 PPU clock
-	cnt *= 3
 
 	// each PPU frame is 341*262=89342 PPU clocks long
 
@@ -160,6 +157,8 @@ func (p *PPU) Clock(cnt uint64) {
 			}
 		}
 	}
+
+	return cnt
 }
 
 func (p *PPU) Flip() {

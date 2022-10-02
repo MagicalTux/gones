@@ -16,7 +16,7 @@ func (m Model) clock() *nesclock.Master {
 	case PAL:
 		return nesclock.New(nesclock.PAL, nesclock.StdMul)
 	default:
-		return nil
+		panic("invalid model")
 	}
 }
 
@@ -27,6 +27,17 @@ func (m Model) cpuIntv() uint64 {
 	case PAL:
 		return 16
 	default:
-		return 12 // ??
+		panic("invalid model")
+	}
+}
+
+func (m Model) ppuIntv() uint64 {
+	switch m {
+	case NTSC:
+		return 4
+	case PAL:
+		return 5
+	default:
+		panic("invalid model")
 	}
 }

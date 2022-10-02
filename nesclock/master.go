@@ -51,15 +51,20 @@ func New(freq, mul uint64) *Master {
 	return res
 }
 
+func (m *Master) Frequency() uint64 {
+	return m.freq
+}
+
 // Listen will cause cb() to be called every `divider` tick of the master
 // clock, allowing synchronization between various elements of the NES.
-func (m *Master) Listen(divider uint64, cb ClockInput) *Listener {
+func (m *Master) Listen(divider, delta uint64, cb ClockInput) *Listener {
 	l := &Listener{
 		cb:      cb,
 		divider: divider,
+		delta:   delta,
 	}
 
-	l.nextRun = ((atomic.LoadUint64(&m.pos) / l.divider) + 1) * l.divider
+	l.nextRun = ((atomic.LoadUint64(&m.pos)/l.divider)+1)*l.divider + l.delta
 	m.insert(l)
 	return l
 }
@@ -131,6 +136,7 @@ func (m *Master) insert(l *Listener) {
 	defer m.mu.Unlock()
 
 	if m.next == nil {
+		l.next = nil
 		m.next = l
 		return
 	}
@@ -143,6 +149,7 @@ func (m *Master) insert(l *Listener) {
 	}
 	for {
 		if cur.next == nil {
+			l.next = nil
 			cur.next = l
 			return
 		}

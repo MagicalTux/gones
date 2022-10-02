@@ -63,24 +63,29 @@ func (apu *APU) setSampleRate(sampleRate float64) {
 	}
 }
 
-func (apu *APU) Clock(cnt uint64) {
+func (apu *APU) Clock240(cnt uint64) uint64 {
+	// 240Hz clock
 	for i := uint64(0); i < cnt; i += 1 {
-		cycle1 := apu.cycle
-		apu.cycle++
-		cycle2 := apu.cycle
-		apu.stepTimer()
-		//f1 := int(float64(cycle1) / frameCounterRate)
-		//f2 := int(float64(cycle2) / frameCounterRate)
-		//if f1 != f2 {
-		if apu.cycle%7457 == 0 {
-			apu.stepFrameCounter()
-		}
-		s1 := int(float64(cycle1) / apu.sampleRate)
-		s2 := int(float64(cycle2) / apu.sampleRate)
-		if s1 != s2 {
-			apu.sendSample()
-		}
+		apu.stepFrameCounter()
 	}
+	return cnt
+}
+
+func (apu *APU) Clock44100(cnt uint64) uint64 {
+	// 44100Hz clock
+	for i := uint64(0); i < cnt; i += 1 {
+		apu.sendSample()
+	}
+	return cnt
+}
+
+func (apu *APU) ClockCPU(cnt uint64) uint64 {
+	// Clock running at same speed as CPU
+	for i := uint64(0); i < cnt; i += 1 {
+		apu.cycle++
+		apu.stepTimer()
+	}
+	return cnt
 }
 
 // https://www.nesdev.org/wiki/APU_Frame_Counter
