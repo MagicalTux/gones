@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	NTSC = 21477470 // 21.47727 MHz (NTSC)
-	PAL  = 26601700 // 26.6017 MHz (PAL)
+	// See: https://www.nesdev.org/wiki/Cycle_reference_chart
+	NTSC = 21477470 // 21.47727 MHz (NTSC) 21.477272 MHz ± 40 Hz
+	PAL  = 26601700 // 26.6017 MHz (PAL) 26.601712 MHz ± 50 Hz
 
-	StdMul = 100
+	StdMul = 25
 )
 
 type ClockInput func(uint64) uint64
@@ -26,12 +27,15 @@ type Master struct {
 	mu   sync.Mutex
 }
 
+// New returns a new clock running at the given frequency, using the specified
+// mul value as increment value. Higher mul values means more calls will happen
+// in batches, but improves how close this will run to real time.
 func New(freq, mul uint64) *Master {
 	// compute nanoseconds for `mul` Hz
 	intv := time.Second * time.Duration(mul) / time.Duration(freq)
 	realFreq := uint64(time.Second * time.Duration(mul) / intv)
 
-	log.Printf("Clock: requested %d Hz clock, computed clock will be %d Hz (%dHz/%s interval, a %01.6f%% diff)", freq, realFreq, mul, intv, float64(realFreq-freq)/float64(freq)*100)
+	log.Printf("Clock: requested %d Hz clock, computed clock will be %d Hz (%d pulses/%s interval, a %01.6f%% diff)", freq, realFreq, mul, intv, float64(realFreq-freq)/float64(freq)*100)
 
 	res := &Master{
 		freq: freq,
@@ -40,6 +44,9 @@ func New(freq, mul uint64) *Master {
 		now:  time.Now(),
 	}
 	go res.thread()
+
+	// Sample usage:
+	//res.Listen(freq/10, func(uint64) uint64 { log.Printf("Clock: test @1/10th of a sec"); return 1 })
 
 	return res
 }
@@ -74,25 +81,33 @@ func (m *Master) thread() {
 			now := time.Now()
 			eslap := now.Sub(m.now)
 
+			// how long to sleep until cur > nextRun?
 			sleepHz := (cur.nextRun - pos)
 			sleepCycles := sleepHz / m.mul
+			// if not round, add 1
 			if sleepHz%m.mul != 0 {
 				sleepCycles += 1
 			}
+			// convert to time duration
 			sleep := time.Duration(sleepCycles) * m.intv
 			if eslap < sleep {
 				// can sleep more
 				time.Sleep(sleep - eslap)
 				m.now = now.Add(sleep - eslap)
+				pos += sleepHz
+			} else {
+				// convert eslap back into time unit
+				timCycles := uint64(eslap / m.intv)
+				pos += timCycles * m.mul
+				m.now = m.now.Add(time.Duration(timCycles) * m.intv)
 			}
-			pos += sleepHz
 			atomic.StoreUint64(&m.pos, pos)
 		}
 
 		// call it
 		// TODO: compute how much time we have until cur.next & pass it as parameter
 
-		cnt := cur.cb(1)
+		cnt := cur.run(1)
 
 		// add time
 		cur.nextRun += cur.divider * cnt

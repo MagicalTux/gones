@@ -94,7 +94,7 @@ func (p *PPU) Reset(cnt uint64) {
 	p.frame = 0
 }
 
-func (p *PPU) Clock(cnt int) {
+func (p *PPU) Clock(cnt uint64) {
 	p.checkPendingNMI()
 
 	if cnt == 0 {
@@ -110,7 +110,7 @@ func (p *PPU) Clock(cnt int) {
 
 	// each PPU frame is 341*262=89342 PPU clocks long
 
-	for ; cnt > 0; cnt -= 1 {
+	for xrun := uint64(0); xrun < cnt; xrun += 1 {
 		p.cycle += 1
 
 		if p.cycle == 341 {

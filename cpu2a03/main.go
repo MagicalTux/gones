@@ -3,7 +3,6 @@ package cpu2a03
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/memory"
@@ -56,37 +55,12 @@ func New() *Cpu2A03 {
 
 // Typically this runs into a goroutine
 // go cpu.Start(cpu2a03.NTSC)
-func (cpu *Cpu2A03) Start(clockLn time.Duration) {
-	t := time.NewTicker(time.Millisecond)
-	defer t.Stop()
-
-	first := true
-	var prev time.Time
-
-	for now := range t.C {
-		if first {
-			first = false
-			prev = now
-			continue
-		}
-		if cpu.fault {
-			break
-		}
-
-		// compute number of cycles we should be running
-		cycles := int(NTSCFreq * now.Sub(prev).Seconds())
-		//log.Printf("cycles = %d", cycles)
-
-		for cycles > 0 {
-			cycles -= cpu.Clock()
-		}
-		prev = now
-	}
-
-	log.Printf("CPU stopped due to fault: %s", cpu)
+func (cpu *Cpu2A03) Start() {
+	// trigger once every 12 clocks
+	cpu.Clk.Listen(12, cpu.Clock)
 }
 
-func (cpu *Cpu2A03) Clock() int {
+func (cpu *Cpu2A03) Clock(uint64) uint64 {
 	if cpu.fault {
 		return 9999
 	}
@@ -114,7 +88,7 @@ func (cpu *Cpu2A03) Clock() int {
 
 	cpu.cyc += uint64(o.cyc)
 
-	cycdelta := int(cpu.cyc - cycstart)
+	cycdelta := cpu.cyc - cycstart
 
 	// move PPU forward
 	cpu.PPU.Clock(cycdelta)

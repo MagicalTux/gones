@@ -63,8 +63,8 @@ func (apu *APU) setSampleRate(sampleRate float64) {
 	}
 }
 
-func (apu *APU) Clock(cnt int) {
-	for i := 0; i < cnt; i += 1 {
+func (apu *APU) Clock(cnt uint64) {
+	for i := uint64(0); i < cnt; i += 1 {
 		cycle1 := apu.cycle
 		apu.cycle++
 		cycle2 := apu.cycle

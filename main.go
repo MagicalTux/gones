@@ -25,7 +25,7 @@ func (g *Game) Update() error {
 	if !g.started {
 		g.started = true
 		g.cpu.Reset()
-		go g.cpu.Start(cpu2a03.NTSC)
+		g.cpu.Start()
 
 		snd := audio.NewContext(44100)
 		if player, err := snd.NewPlayer(g.cpu.APU); err != nil {
