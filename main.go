@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"image"
 	"log"
 	"os"
 	"runtime/pprof"
@@ -41,8 +42,9 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	data := g.cpu.PPU.Front() // current image
-	g.img.WritePixels(data.Pix)
+	g.cpu.PPU.Front(func(img *image.RGBA) {
+		g.img.WritePixels(img.Pix)
+	})
 	screen.DrawImage(g.img, nil)
 	//screen.DrawImage(g.cpu.PPU.Front(), nil)
 	//ebitenutil.DebugPrint(screen, "Hello, World!")

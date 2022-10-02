@@ -2,6 +2,7 @@ package ppu
 
 import (
 	"image"
+	"sync"
 
 	"github.com/MagicalTux/gones/memory"
 )
@@ -55,6 +56,7 @@ type PPU struct {
 	spriteIndexes    [8]byte
 
 	front, back     *image.RGBA
+	frontLk         sync.Mutex
 	VBlankInterrupt func()
 
 	sync chan *image.RGBA
@@ -161,16 +163,16 @@ func (p *PPU) Clock(cnt int) {
 }
 
 func (p *PPU) Flip() {
+	p.frontLk.Lock()
 	p.front, p.back = p.back, p.front
-	select {
-	case p.sync <- p.front:
-	default:
-	}
+	p.frontLk.Unlock()
 }
 
-func (p *PPU) Front() *image.RGBA {
-	// wait for the front image to be changed before taking
-	return <-p.sync
+func (p *PPU) Front(cb func(*image.RGBA)) {
+	p.frontLk.Lock()
+	defer p.frontLk.Unlock()
+
+	cb(p.front)
 }
 
 func (p *PPU) checkPendingNMI() {
