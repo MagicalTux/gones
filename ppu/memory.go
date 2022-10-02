@@ -96,7 +96,7 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 		}
 		return 0
 	case PPUDATA:
-		if p.V > 0x3f00 {
+		if p.V >= 0x3f00 {
 			// write to palette
 			p.Palette[p.V%0x20] = val
 		} else {
