@@ -222,7 +222,7 @@ var cpu2a03op = [256]*op{
 	&op{"TAY", tay, amImpl, 2},
 	&op{"LDA", lda, amImmed, 2},
 	&op{"TAX", tax, amImpl, 2},
-	nil, // 2
+	&op{"LXA", lxa, amImmed, 2},
 	&op{"LDY", ldy, amAbs, 4},
 	&op{"LDA", lda, amAbs, 4},
 	&op{"LDX", ldx, amAbs, 4},
@@ -242,7 +242,7 @@ var cpu2a03op = [256]*op{
 	&op{"CLV", clv, amImpl, 2},
 	&op{"LDA", lda, amAbsY, 4},
 	&op{"TSX", tsx, amImpl, 2},
-	nil, // 4
+	&op{"LAS", las, amAbsY, 2},
 	&op{"LDY", ldy, amAbsX, 4},
 	&op{"LDA", lda, amAbsX, 4},
 	&op{"LDX", ldx, amAbsY, 4},
@@ -262,7 +262,7 @@ var cpu2a03op = [256]*op{
 	&op{"INY", iny, amImpl, 2},
 	&op{"CMP", cmp, amImmed, 2},
 	&op{"DEX", dex, amImpl, 2},
-	nil, // 2
+	&op{"SBX", sbx, amImmed, 2},
 	&op{"CPY", cpy, amAbs, 4},
 	&op{"CMP", cmp, amAbs, 4},
 	&op{"DEC", dec, amAbs, 6},

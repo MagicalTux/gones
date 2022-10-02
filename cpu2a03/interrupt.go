@@ -21,7 +21,7 @@ func (cpu *Cpu2A03) IRQ() {
 func (cpu *Cpu2A03) handleInterrupt() {
 	// handle interrupt
 	cpu.Push16(cpu.PC)
-	cpu.Push(cpu.P | FlagBreak)
+	cpu.Push(cpu.P) // | FlagBreak)
 
 	switch cpu.interrupt {
 	case InterruptNMI:
@@ -39,6 +39,7 @@ func brk(cpu *Cpu2A03, am AddressMode) {
 	cpu.Push(cpu.P | FlagBreak)
 
 	cpu.PC = cpu.Read16(IRQVector) // IRQ/BRK
+	cpu.setFlag(FlagInterruptDisable, true)
 }
 
 func rti(cpu *Cpu2A03, am AddressMode) {
