@@ -81,7 +81,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cpu := cpu2a03.New()
+	cpu := cpu2a03.New(cpu2a03.NTSC)
 
 	cpu.Input[0] = nesinput.NewKeyboard()
 

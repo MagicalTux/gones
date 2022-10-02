@@ -30,14 +30,16 @@ type Cpu2A03 struct {
 	Input     []apu.InputDevice
 	fault     bool
 	interrupt byte
+	model     Model
 
 	cyc uint64
 }
 
-func New() *Cpu2A03 {
+func New(m Model) *Cpu2A03 {
 	cpu := &Cpu2A03{
 		Memory: memory.NewBus(),
-		Clk:    nesclock.New(nesclock.NTSC, nesclock.StdMul),
+		Clk:    m.clock(),
+		model:  m,
 	}
 	cpu.PPU = ppu.New()
 	cpu.PPU.VBlankInterrupt = cpu.NMI             // connect PPU's vblank to NMI
@@ -56,11 +58,11 @@ func New() *Cpu2A03 {
 // Typically this runs into a goroutine
 // go cpu.Start(cpu2a03.NTSC)
 func (cpu *Cpu2A03) Start() {
-	// trigger once every 12 clocks
-	cpu.Clk.Listen(12, cpu.Clock)
+	// trigger once every 12 clocks (if NTSC)
+	cpu.Clk.Listen(cpu.model.cpuIntv(), cpu.clock)
 }
 
-func (cpu *Cpu2A03) Clock(uint64) uint64 {
+func (cpu *Cpu2A03) clock(uint64) uint64 {
 	if cpu.fault {
 		return 9999
 	}
