@@ -49,3 +49,9 @@ func Load(fn string) (*Data, error) {
 
 	return res, nil
 }
+
+func (d *Data) unload() {
+	// need unmap
+	unix.Munmap(d.m)
+	d.m = nil
+}

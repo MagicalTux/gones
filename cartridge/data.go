@@ -6,7 +6,6 @@ import (
 	"github.com/MagicalTux/gones/cpu2a03"
 	"github.com/MagicalTux/gones/memory"
 	"github.com/MagicalTux/gones/ppu"
-	"golang.org/x/sys/unix"
 )
 
 type Data struct {
@@ -25,12 +24,14 @@ type Data struct {
 
 func (d *Data) Close() error {
 	if d.m != nil {
-		// need unmap
-		unix.Munmap(d.m)
-		d.m = nil
+		d.unload()
+	}
+	if f := d.f; f != nil {
+		d.f = nil
+		return f.Close()
 	}
 
-	return d.f.Close()
+	return nil
 }
 
 func (d *Data) PRG() []byte {
