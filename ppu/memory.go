@@ -62,6 +62,9 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 			p.vblankNMI = p.vblankFlag
 		}
 		p.ctrl = val
+		// also affects T
+		// t: ....BA.. ........ = d: ......BA
+		p.T = (p.T & 0xF3FF) | ((uint16(val) & 0x03) << 10)
 	case PPUMASK:
 		p.mask = val
 	case OAMADDR:

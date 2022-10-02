@@ -4,8 +4,8 @@ import "log"
 
 const (
 	InterruptNone = iota // 0
-	InterruptNMI
 	InterruptIRQ
+	InterruptNMI
 )
 
 func (cpu *Cpu2A03) NMI() {

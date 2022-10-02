@@ -1,6 +1,12 @@
 # goNES
 
-NES emulator based on ebitengine
+NES emulator using ebitengine.
+
+PPU & APU are based on [Michael Fogleman's emulator](https://github.com/fogleman/nes), with added/removed bugs and more rewrites planned/needed.
+
+MOS 6502 CPU is mostly implemented from scratch.
+
+Memory mapping system is also implemented from scratch, as well as cartridge loading/mapping.
 
 ## References
 

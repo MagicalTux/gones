@@ -186,9 +186,11 @@ func (m *MMC1) MemWrite(offset uint16, v byte) byte {
 		return 0
 	case 0xe, 0xf:
 		// PRG bank (internal, $E000-$FFFF)
-		m.prgBankSel = v
-		log.Printf("MMC1: PRG bank set to $%02x", v)
-		m.updateBanks()
+		if v != m.prgBankSel {
+			m.prgBankSel = v
+			log.Printf("MMC1: PRG bank set to $%02x", v)
+			m.updateBanks()
+		}
 		return 0
 	}
 	return 0
