@@ -102,3 +102,7 @@ func (b Bus) String() string {
 
 	return fmt.Sprintf("Memory Bus containing:\n%s", strings.Join(r, "\n"))
 }
+
+func (b *Bus) Length() uint16 {
+	return 0
+}

@@ -3,7 +3,9 @@ package cartridge
 import (
 	"os"
 
+	"github.com/MagicalTux/gones/cpu2a03"
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/ppu"
 	"golang.org/x/sys/unix"
 )
 
@@ -12,11 +14,13 @@ type Data struct {
 	m      []byte // map+len
 	Mapper Mapper
 
-	numPRG     byte // Size of PRG ROM in 16 KB units
-	numCHR     byte
-	numPRGram  int
-	mapperType MapperType
-	hasTrainer bool
+	numPRG          byte // Size of PRG ROM in 16 KB units
+	numCHR          byte
+	numPRGram       int
+	mapperType      MapperType
+	hasTrainer      bool
+	hasMirroring    bool
+	ignoreMirroring bool
 }
 
 func (d *Data) Close() error {
@@ -60,4 +64,23 @@ func (d *Data) CHR() memory.Handler {
 	romSize = int(d.numCHR) << 13 // 1=8kB, ...
 
 	return memory.ROM(d.m[offt : offt+romSize])
+}
+
+func (d *Data) Setup(cpu *cpu2a03.Cpu2A03) error {
+	err := d.Mapper.setup(cpu)
+	if err != nil {
+		return err
+	}
+	// see https://www.nesdev.org/wiki/Mirroring#Nametable_Mirroring
+	if d.ignoreMirroring {
+		// Ignore mirroring control or above mirroring bit; instead provide four-screen VRAM
+		cpu.PPU.SetMirroring(ppu.FourScreenMirroring)
+	} else if d.hasMirroring {
+		// 1: vertical (horizontal arrangement) (CIRAM A10 = PPU A10)
+		cpu.PPU.SetMirroring(ppu.VerticalMirroring)
+	} else {
+		// 0: horizontal (vertical arrangement) (CIRAM A10 = PPU A11)
+		cpu.PPU.SetMirroring(ppu.HorizontalMirroring)
+	}
+	return nil
 }

@@ -1,4 +1,4 @@
-package cpu2a03
+package apu
 
 // InputDvice is a generic device connected to either port of the NES
 // Typically a controller, but can be other stuff

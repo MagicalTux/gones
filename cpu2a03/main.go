@@ -3,9 +3,9 @@ package cpu2a03
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
+	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/memory"
 	"github.com/MagicalTux/gones/ppu"
 )
@@ -24,30 +24,24 @@ type Cpu2A03 struct {
 	P    byte   // status register
 
 	Memory    memory.Master
-	Input     [2]InputDevice
 	PPU       *ppu.PPU
-	APU       *APU
+	APU       *apu.APU
+	Input     []apu.InputDevice
 	fault     bool
 	interrupt byte
 
-	trace *os.File
-	cyc   uint64
-	clk   uint64
+	cyc uint64
 }
 
 func New() *Cpu2A03 {
 	cpu := &Cpu2A03{
 		Memory: memory.NewBus(),
-		APU:    &APU{},
 	}
 	cpu.PPU = ppu.New()
-	cpu.PPU.VblankInterrupt(cpu.NMI) // connect PPU's vblank to NMI
-	cpu.APU.cpu = cpu
-
-	trace, err := os.Create("trace_2a03.txt")
-	if err == nil {
-		cpu.trace = trace
-	}
+	cpu.PPU.VblankInterrupt(cpu.NMI)              // connect PPU's vblank to NMI
+	cpu.APU = apu.New(cpu.Memory, cpu.timeFreeze) // APU has access to the cpu's memory & clock
+	cpu.Input = cpu.APU.Input[:]
+	cpu.APU.Interrupt = cpu.IRQ
 
 	// setup RAM (2kB=0x800 bytes) with its mirrors
 	cpu.Memory.MapHandler(0x0000, 0x2000, memory.NewRAM(0x800))
@@ -60,32 +54,38 @@ func New() *Cpu2A03 {
 // Typically this runs into a goroutine
 // go cpu.Start(cpu2a03.NTSC)
 func (cpu *Cpu2A03) Start(clockLn time.Duration) {
-	t := time.NewTicker(clockLn)
+	t := time.NewTicker(time.Millisecond)
 	defer t.Stop()
 
-	for !cpu.fault {
-		cpu.Clock()
+	first := true
+	var prev time.Time
 
-		select {
-		case <-t.C:
+	for now := range t.C {
+		if first {
+			first = false
+			prev = now
+			continue
 		}
+		if cpu.fault {
+			break
+		}
+
+		// compute number of cycles we should be running
+		cycles := int(NTSCFreq * now.Sub(prev).Seconds())
+		//log.Printf("cycles = %d", cycles)
+
+		for cycles > 0 {
+			cycles -= cpu.Clock()
+		}
+		prev = now
 	}
 
 	log.Printf("CPU stopped due to fault: %s", cpu)
-
-	for i := uint16(2); i <= 3; i++ {
-		log.Printf("Address value at %d: $%02x", i, cpu.Memory.MemRead(i))
-	}
 }
 
-func (cpu *Cpu2A03) Clock() {
+func (cpu *Cpu2A03) Clock() int {
 	if cpu.fault {
-		return
-	}
-	cpu.clk += 1
-	if cpu.clk < cpu.cyc {
-		// wait for clock to catch up
-		return
+		return 9999
 	}
 
 	if cpu.interrupt == InterruptNMI || (cpu.interrupt == InterruptIRQ && !cpu.getFlag(FlagInterruptDisable)) {
@@ -93,27 +93,39 @@ func (cpu *Cpu2A03) Clock() {
 		cpu.interrupt = InterruptNone
 	}
 
+	cycstart := cpu.cyc
+
 	pos := cpu.PC
 	// read value at PC
 	e := cpu.ReadPC()
 	o := cpu2a03op[e]
 	if o == nil || o.f == nil {
 		cpu.fatal("FATAL CPU ERROR - unsupported op $%02x @ $%04x / %s", e, pos, cpu)
-		return
+		return 9999
 	}
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
 	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
-	if cpu.trace != nil {
-		fmt.Fprintf(cpu.trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu)
-	}
+	//fmt.Fprintf(cpu.trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu)
 
 	o.f(cpu, o.am)
 
-	cyc := int(o.cyc)
-	cpu.cyc += uint64(cyc)
+	cpu.cyc += uint64(o.cyc)
+
+	cycdelta := int(cpu.cyc - cycstart)
 
 	// move PPU forward
-	cpu.PPU.Clock(cyc * 3)
+	cpu.PPU.Clock(cycdelta)
+	// move APU forward
+	cpu.APU.Clock(cycdelta)
+
+	// number of cycles we've consumed in this run
+	return cycdelta
+}
+
+// timeFreeze is used to "freeze" the CPU by a number of cycles, delaying the next operation
+func (cpu *Cpu2A03) timeFreeze(v uint64) uint64 {
+	cpu.cyc += v
+	return cpu.cyc
 }
 
 func (cpu *Cpu2A03) Reset() {
@@ -125,7 +137,6 @@ func (cpu *Cpu2A03) Reset() {
 	cpu.P = FlagIgnored | FlagInterruptDisable
 
 	cpu.cyc = 7 // cpu init typically takes 7 cycles
-	cpu.clk = 7 // which is already done
 
 	// $FFFC-$FFFD = Reset vector
 	cpu.PC = cpu.Read16(ResetVector)
@@ -138,13 +149,6 @@ func (cpu *Cpu2A03) Reset() {
 func (cpu *Cpu2A03) fatal(v string, a ...any) {
 	cpu.fault = true
 	log.Printf("CPU FAULT: "+v, a...)
-	cpu.msg(v, a...)
-}
-
-func (cpu *Cpu2A03) msg(v string, a ...any) {
-	if cpu.trace != nil {
-		fmt.Fprintf(cpu.trace, "Debug: "+v+"\n", a...)
-	}
 }
 
 func (cpu *Cpu2A03) ReadPC() uint8 {

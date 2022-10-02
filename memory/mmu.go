@@ -98,3 +98,7 @@ func (m *MMU) MemWrite(offset uint16, val byte) byte {
 func (m *MMU) Ptr() uintptr {
 	return uintptr(unsafe.Pointer(m))
 }
+
+func (m *MMU) Length() uint16 {
+	return 0
+}

@@ -3,6 +3,7 @@ package memory
 type Handler interface {
 	MemRead(offset uint16) byte
 	MemWrite(offset uint16, val byte) byte
+	Length() uint16
 	Ptr() uintptr
 }
 

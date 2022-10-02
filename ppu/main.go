@@ -1,8 +1,9 @@
 package ppu
 
 import (
+	"image"
+
 	"github.com/MagicalTux/gones/memory"
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // https://www.nesdev.org/wiki/PPU_rendering#Frame_timing_diagram
@@ -38,15 +39,34 @@ type PPU struct {
 
 	readBuf byte // read buffer for PPUDATA
 
-	front, back *ebiten.Image
+	// variables used during rendering
+	nameTableByte      byte
+	attributeTableByte byte
+	lowTileByte        byte
+	highTileByte       byte
+	tileData           uint64
+	nameTableMemory    memory.RAM
+
+	// sprites
+	spriteCount      int
+	spritePatterns   [8]uint32
+	spritePositions  [8]byte
+	spritePriorities [8]byte
+	spriteIndexes    [8]byte
+
+	front, back *image.RGBA
 	vblank      func()
+
+	sync chan *image.RGBA
 }
 
 func New() *PPU {
 	ppu := &PPU{
-		Memory: memory.NewBus(),
-		front:  ebiten.NewImage(256, 240),
-		back:   ebiten.NewImage(256, 240),
+		Memory:          memory.NewBus(),
+		front:           image.NewRGBA(image.Rect(0, 0, 256, 240)),
+		back:            image.NewRGBA(image.Rect(0, 0, 256, 240)),
+		sync:            make(chan *image.RGBA),
+		nameTableMemory: memory.NewRAM(0x800), // NEW standard 2kB PPU work ram
 	}
 
 	// https://www.nesdev.org/wiki/PPU_memory_map
@@ -57,7 +77,8 @@ func New() *PPU {
 	// nametables
 	// 0x2000~0x3f00 is mapped typically to the PPU ram, but the cartridge can clear this mapping to map something else
 	// we actually map the whole thing, but reads to values after 0x3f00 will return data from the palette
-	ppu.Memory.MapHandler(0x2000, 0x2000, memory.NewRAM(0x800))
+	// NOTE: see mirroring.go for ways this can be re-mapped if required
+	ppu.Memory.MapHandler(0x2000, 0x2000, ppu.nameTableMemory)
 
 	return ppu
 }
@@ -76,38 +97,84 @@ func (p *PPU) Reset(cnt uint64) {
 }
 
 func (p *PPU) Clock(cnt int) {
-	// move clock forward by cnt (1 CPU clock = 3 PPU clock)
-	p.cycle += uint16(cnt * 3)
-
-	// each PPU frame is 341*262=89342 PPU clocks long
 	p.checkPendingNMI()
 
-	for p.cycle >= 341 {
-		p.cycle -= 341
-		p.scanline += 1
-		if p.scanline >= 241 && !p.vblankFlag {
-			p.vblankFlag = true
-			p.vblankNMI = true // generate NMI at next available occasion
-			p.stat |= VBlankStarted
+	if cnt == 0 {
+		// should not happen
+		return
+	}
+
+	// read some status stuff
+	renderEnabled := p.getMask(ShowBg) || p.getMask(ShowSprites)
+
+	// 1 CPU clock = 3 PPU clock
+	cnt *= 3
+
+	// each PPU frame is 341*262=89342 PPU clocks long
+
+	for ; cnt > 0; cnt -= 1 {
+		p.cycle += 1
+
+		if p.cycle == 341 {
+			// increase scanline
+			p.cycle = 0
+			p.scanline += 1
+
+			if p.scanline == 262 {
+				p.scanline = 0
+				p.frame += 1
+				p.oddframe = p.frame&1 == 1 // !p.oddframe
+			}
 		}
-		if p.scanline >= 261 && p.vblankFlag {
+
+		if renderEnabled {
+			p.triggerRender()
+		}
+
+		// generate a position uint32 identifier to easily test various positions on the frame.
+		// Because we loop on all pixels all legal values are guaranteed to happen within a frame
+		// this allow very fine tuning of events happening at specific pixels such as NMI, etc
+		posId := uint32(p.scanline)<<16 | uint32(p.cycle)
+
+		// See: https://www.nesdev.org/w/images/default/d/d1/Ntsc_timing.png
+
+		switch posId {
+		case 0x00f10001: // scanline=241 cycle=1
+			p.vblankFlag = true
+			p.stat |= VBlankStarted
+			p.Flip() // perform double buffer flip
+		case 0x00f10003: // scanline=241 cycle=3
+			p.vblankNMI = true // generate NMI at next available occasion (slightly delayed compared to flag)
+		case 0x01050001: // scanline=261 cycle=1
 			// clear vblank, sprite, overflow
 			p.vblankFlag = false
 			p.vblankNMI = false
 			// clear SpriteZeroHit & VBlankStarted from p.stat
-			p.stat &= ^(SpriteZeroHit | VBlankStarted)
-			if p.vblank != nil {
-				// trigger vblank interrupt
-				p.vblank()
+			p.stat &= ^(SpriteZeroHit | SpriteOverflow | VBlankStarted)
+		case 0x01050153: // scanline=261 cycle=340
+			if renderEnabled && p.oddframe {
+				// when rendering, frames after an odd frame will skip their first 0,0 pixel, act as if it was done just now
+				p.cycle = 0
+				p.scanline = 0
+				p.frame += 1
+				p.oddframe = p.frame&1 == 1 // !p.oddframe
+				posId = 0
 			}
 		}
-		if p.scanline >= 262 {
-			p.scanline -= 262 // 262=0
-			p.frame += 1
-			p.oddframe = !p.oddframe
-		}
-		p.checkPendingNMI()
 	}
+}
+
+func (p *PPU) Flip() {
+	p.front, p.back = p.back, p.front
+	select {
+	case p.sync <- p.front:
+	default:
+	}
+}
+
+func (p *PPU) Front() *image.RGBA {
+	// wait for the front image to be changed before taking
+	return <-p.sync
 }
 
 func (p *PPU) checkPendingNMI() {

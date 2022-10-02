@@ -51,8 +51,10 @@ func (d *Data) parse() error {
 	d.mapperType = MapperType(flg6>>4 | flg7&0xf0)
 
 	d.hasTrainer = flg6&flgTrainer == flgTrainer
+	d.hasMirroring = flg6&flgMirroring == flgMirroring
+	d.ignoreMirroring = flg6&flgIgnoreMirr == flgIgnoreMirr
 
-	log.Printf("Parsed iNes1 file, %d*16kB PRG, %d*8kB CHR, %d*8kB PRG RAM, mapper=%d, trainer=%v", d.numPRG, d.numCHR, d.numPRGram, d.mapperType, d.hasTrainer)
+	log.Printf("Parsed iNes1 file, %d*16kB PRG, %d*8kB CHR, %d*8kB PRG RAM, mapper=%d, trainer=%v mirroring=%v/%v", d.numPRG, d.numCHR, d.numPRGram, d.mapperType, d.hasTrainer, d.hasMirroring, d.ignoreMirroring)
 
 	if f, ok := mappers[d.mapperType]; ok {
 		d.Mapper = f(d)

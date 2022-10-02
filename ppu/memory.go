@@ -68,6 +68,7 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 		p.oamAddr = val
 		return 0
 	case OAMDATA:
+		//log.Printf("got OAM data $%02x = $%02x", p.oamAddr, val)
 		// write value & increment addr
 		p.OAM[p.oamAddr] = val
 		p.oamAddr += 1
@@ -119,4 +120,8 @@ func (p *PPU) Ptr() uintptr {
 
 func (p *PPU) String() string {
 	return "PPU"
+}
+
+func (p *PPU) Length() uint16 {
+	return 0x2000
 }
