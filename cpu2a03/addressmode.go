@@ -165,13 +165,13 @@ func (am AddressMode) Debug(cpu *Cpu2A03) string {
 		return "impl"
 	case amInd:
 		addr := cpu.PeekPC16()
-		return fmt.Sprintf("ind = ($%04x) = $%04x", addr, cpu.Read16W(addr))
+		return fmt.Sprintf("ind = ($%04x)", addr)
 	case amIndX:
 		addr := cpu.PeekPC()
-		return fmt.Sprintf("ind,X = ($%02x,$%02x) = $%04x", addr, cpu.X, cpu.Read16(uint16(addr+cpu.X)))
+		return fmt.Sprintf("ind,X = ($%02x,$%02x)", addr, cpu.X)
 	case amIndY:
 		addr := uint16(cpu.PeekPC())
-		return fmt.Sprintf("ind,Y = ($%02x),$%02x = $%04x", addr, cpu.Y, cpu.Read16(addr)+uint16(cpu.Y))
+		return fmt.Sprintf("ind,Y = ($%02x),$%02x", addr, cpu.Y)
 	case amRel:
 		offt := uint16(cpu.PeekPC())
 		if offt&0x80 == 0x80 {
