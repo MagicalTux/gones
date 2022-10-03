@@ -142,10 +142,11 @@ func (p *PPU) Clock(cnt uint64) uint64 {
 			p.Flip() // perform double buffer flip
 		case 0x00f10003: // scanline=241 cycle=3
 			p.vblankNMI = p.vblankDoNMI // generate NMI at next available occasion (slightly delayed compared to flag)
-		case 0x01050001: // scanline=261 cycle=1
+		case 0x01050002: // scanline=261 cycle=1
 			// clear vblank, sprite, overflow
 			p.vblankFlag = false
 			p.vblankNMI = false
+			p.vblankDoNMI = false
 			// clear SpriteZeroHit & VBlankStarted from p.stat
 			p.stat &= ^(SpriteZeroHit | SpriteOverflow | VBlankStarted)
 		case 0x01050153: // scanline=261 cycle=340
@@ -183,7 +184,7 @@ func (p *PPU) checkPendingNMI() {
 		return
 	}
 	// check if we have any pending NMI, and send it
-	if p.vblankNMI && p.getFlag(GenerateNMI) {
+	if p.vblankNMI && p.getFlag(GenerateNMI) && p.getStatus(VBlankStarted) {
 		p.vblankNMI = false
 		if f := p.VBlankInterrupt; f != nil {
 			// trigger vblank interrupt
@@ -198,4 +199,8 @@ func (p *PPU) getFlag(flag byte) bool {
 
 func (p *PPU) getMask(m byte) bool {
 	return p.mask&m == m
+}
+
+func (p *PPU) getStatus(m byte) bool {
+	return p.stat&m == m
 }

@@ -10,22 +10,19 @@ func (p *PPU) MemRead(offset uint16) byte {
 
 	switch offset & 7 {
 	case PPUSTATUS: // PPU status
-		if p.scanline == 241 && p.cycle == 1 {
-			// Race Condition Warning: Reading PPUSTATUS within two cycles of the start of vertical blank will return 0 in bit 7 but clear the latch anyway, causing NMI to not occur that frame.
-			p.stat &= ^VBlankStarted // clear it now
-			p.vblankDoNMI = false
-		}
 		stat := p.stat
 		p.stat &= ^VBlankStarted // always clear VBlankStarted when reading PPU STATUS
 		p.W = false              // reading PPUSTATUS resets the PPUADDR latch
-		if p.scanline == 241 && p.cycle == 0 {
+		if p.scanline == 241 && p.cycle == 1 {
 			// special case, hide vblank flag and don't send the NMI
 			p.vblankNMI = false
+			p.vblankDoNMI = false
 			stat &= ^VBlankStarted
 		}
 		if p.scanline == 241 && p.cycle <= 2 {
 			// if we are within 2 PPU clocks of setting p.vblankFlag we should inhibit the NMI
 			p.vblankNMI = false
+			p.vblankDoNMI = false
 		}
 		return stat
 	case OAMDATA:
@@ -62,9 +59,10 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 	// only care about first 3 bits (&0x7)
 	switch offset & 7 {
 	case PPUCTRL:
-		if !p.getFlag(VBlankStarted) && val&VBlankStarted == VBlankStarted {
+		if !p.getFlag(GenerateNMI) && val&GenerateNMI == GenerateNMI && p.getStatus(VBlankStarted) {
 			// enabling VBlankStarted will reset p.vblankNMI to p.vblankFlag and may trigger an extra NMI
-			p.vblankNMI = p.vblankFlag
+			// ??
+			p.vblankNMI = p.vblankDoNMI
 		}
 		p.ctrl = val
 		// also affects T
