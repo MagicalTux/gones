@@ -17,6 +17,7 @@ Clock uses a master clock at the frequency specified for NES, and divisors to fe
 * `cartridge` has code to load a cartridge and map it on the CPU's bus
 * `ppu` contains video rendering related code
 * `apu` contains audio code
+* `nesclock` generate clock signals for the other parts of the system
 
 ## References
 
