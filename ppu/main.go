@@ -26,8 +26,9 @@ type PPU struct {
 	oddframe bool // frame is even/odd (starting at frame 0 which is even)
 	frame    uint64
 
-	vblankFlag bool
-	vblankNMI  bool
+	vblankFlag  bool
+	vblankNMI   bool
+	vblankDoNMI bool
 
 	oamAddr byte   // used to read/write OAM data
 	ppuAddr uint16 // addr for PPUDATA
@@ -136,10 +137,11 @@ func (p *PPU) Clock(cnt uint64) uint64 {
 		switch posId {
 		case 0x00f10001: // scanline=241 cycle=1
 			p.vblankFlag = true
+			p.vblankDoNMI = true
 			p.stat |= VBlankStarted
 			p.Flip() // perform double buffer flip
 		case 0x00f10003: // scanline=241 cycle=3
-			p.vblankNMI = true // generate NMI at next available occasion (slightly delayed compared to flag)
+			p.vblankNMI = p.vblankDoNMI // generate NMI at next available occasion (slightly delayed compared to flag)
 		case 0x01050001: // scanline=261 cycle=1
 			// clear vblank, sprite, overflow
 			p.vblankFlag = false

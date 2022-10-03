@@ -10,6 +10,11 @@ func (p *PPU) MemRead(offset uint16) byte {
 
 	switch offset & 7 {
 	case PPUSTATUS: // PPU status
+		if p.scanline == 241 && p.cycle == 1 {
+			// Race Condition Warning: Reading PPUSTATUS within two cycles of the start of vertical blank will return 0 in bit 7 but clear the latch anyway, causing NMI to not occur that frame.
+			p.stat &= ^VBlankStarted // clear it now
+			p.vblankDoNMI = false
+		}
 		stat := p.stat
 		p.stat &= ^VBlankStarted // always clear VBlankStarted when reading PPU STATUS
 		p.W = false              // reading PPUSTATUS resets the PPUADDR latch

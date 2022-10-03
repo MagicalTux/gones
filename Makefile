@@ -9,7 +9,8 @@ all:
 	$(GOROOT)/bin/go build -v
 
 run: all
-	./gones cur.nes
+	./gones nes-test-roms/ppu_vbl_nmi/ppu_vbl_nmi.nes
+	#./gones cur.nes
 
 deps:
 	$(GOROOT)/bin/go get -v -t .
