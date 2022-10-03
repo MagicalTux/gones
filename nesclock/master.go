@@ -128,8 +128,25 @@ func (m *Master) thread() {
 			if eslap < sleep {
 				// can sleep more
 				time.Sleep(sleep - eslap)
-				m.now = now.Add(sleep - eslap)
-				pos += sleepHz
+
+				// This would be in a perfect world:
+				//m.now = now.Add(sleep - eslap)
+				//pos += sleepHz
+
+				// As it turns out, Go's time.Sleep() can be very random, and while sometimes short sleeps are properly handled (50µs end sleeping 55µs),
+				// other sleeps are not handled properly at all, and a 200µs may end taking 2ms, or a 1ms sleep could end taking 16ms, and someone even
+				// reported a 1 hour sleep taking 1 hour and 3 minutes(!).
+				// So we'll try to sleep the time we need to sleep using time.Sleep(), but re-read time.Now() after sleeping and update timers based
+				// on the new value so we don't end with any surprises.
+				// It looks like go1.20 may fix that (it's the target set on the bug report I found as of this writing), but it seems that even if the
+				// large time difference is made a bit better, time.Sleep() is not a good option (and Go isn't meant to do real time stuff, the garbage
+				// collector being a big proof of it).
+
+				now = time.Now()
+				eslap = now.Sub(m.now)
+				timCycles := uint64(eslap / m.intv)
+				pos += timCycles * m.step
+				m.now = m.now.Add(time.Duration(timCycles) * m.intv)
 			} else {
 				// convert eslap back into time unit
 				timCycles := uint64(eslap / m.intv)
