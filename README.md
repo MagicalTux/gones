@@ -8,6 +8,8 @@ MOS 6502 CPU is mostly implemented from scratch.
 
 Memory mapping system is also implemented from scratch, as well as cartridge loading/mapping.
 
+Clock uses a master clock at the frequency specified for NES, and divisors to feed cpu/ppu/apu/etc synchronized signals.
+
 ## Structure
 
 * `cpu2a03` contains the CPU emulation
