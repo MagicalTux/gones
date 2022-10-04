@@ -13,17 +13,17 @@ func (cpu *Cpu2A03) NMI() {
 }
 
 func (cpu *Cpu2A03) IRQ() {
-	if cpu.interrupt == InterruptNone {
+	if cpu.interrupt < InterruptIRQ {
 		cpu.interrupt = InterruptIRQ
 	}
 }
 
-func (cpu *Cpu2A03) handleInterrupt() {
+func (cpu *Cpu2A03) handleInterrupt(i byte) {
 	// handle interrupt
 	cpu.Push16(cpu.PC)
 	cpu.Push(cpu.P) // | FlagBreak)
 
-	switch cpu.interrupt {
+	switch i {
 	case InterruptNMI:
 		cpu.PC = cpu.Read16(NMIVector) // NMI interrupt vector
 	case InterruptIRQ:
@@ -31,6 +31,19 @@ func (cpu *Cpu2A03) handleInterrupt() {
 	}
 	cpu.setFlag(FlagInterruptDisable, true)
 	cpu.cyc += 7
+}
+
+func (cpu *Cpu2A03) setNMI(v byte) {
+	cpu.nmiSig = v
+}
+
+func (cpu *Cpu2A03) checkPendingNMI() {
+	if cpu.nmiSig > 0 {
+		cpu.nmiSig -= 1
+		if cpu.nmiSig == 0 {
+			cpu.NMI()
+		}
+	}
 }
 
 func brk(cpu *Cpu2A03, am AddressMode) {

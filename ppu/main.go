@@ -58,7 +58,7 @@ type PPU struct {
 
 	front, back     *image.RGBA
 	frontLk         sync.Mutex
-	VBlankInterrupt func()
+	VBlankInterrupt func(byte)
 
 	sync chan *image.RGBA
 }
@@ -186,10 +186,14 @@ func (p *PPU) checkPendingNMI() {
 	// check if we have any pending NMI, and send it
 	if p.vblankNMI && p.getFlag(GenerateNMI) && p.getStatus(VBlankStarted) {
 		p.vblankNMI = false
-		if f := p.VBlankInterrupt; f != nil {
-			// trigger vblank interrupt
-			f()
-		}
+		p.sendInterrupt(1)
+	}
+}
+
+func (p *PPU) sendInterrupt(v byte) {
+	if f := p.VBlankInterrupt; f != nil {
+		// trigger vblank interrupt
+		f(v)
 	}
 }
 

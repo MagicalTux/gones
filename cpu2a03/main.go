@@ -30,9 +30,11 @@ type Cpu2A03 struct {
 	Input     []apu.InputDevice
 	fault     bool
 	interrupt byte
+	nmiSig    byte // NMI timer
 	model     Model
 
-	cyc uint64
+	cyc    uint64
+	freeze uint64
 }
 
 func New(m Model) *Cpu2A03 {
@@ -42,7 +44,7 @@ func New(m Model) *Cpu2A03 {
 		model:  m,
 	}
 	cpu.PPU = ppu.New()
-	cpu.PPU.VBlankInterrupt = cpu.NMI             // connect PPU's vblank to NMI
+	cpu.PPU.VBlankInterrupt = cpu.setNMI          // connect PPU's vblank to NMI
 	cpu.APU = apu.New(cpu.Memory, cpu.timeFreeze) // APU has access to the cpu's memory & clock
 	cpu.Input = cpu.APU.Input[:]
 	cpu.APU.Interrupt = cpu.IRQ
@@ -74,9 +76,14 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	if cpu.fault {
 		return 9999
 	}
+	if cpu.freeze > 0 {
+		v := cpu.freeze
+		cpu.freeze = 0
+		return v
+	}
 
 	if cpu.interrupt == InterruptNMI || (cpu.interrupt == InterruptIRQ && !cpu.getFlag(FlagInterruptDisable)) {
-		cpu.handleInterrupt()
+		cpu.handleInterrupt(cpu.interrupt)
 		cpu.interrupt = InterruptNone
 	}
 
@@ -100,14 +107,16 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 
 	cycdelta := cpu.cyc - cycstart
 
+	cpu.checkPendingNMI()
+
 	// number of cycles we've consumed in this run
 	return cycdelta
 }
 
 // timeFreeze is used to "freeze" the CPU by a number of cycles, delaying the next operation
 func (cpu *Cpu2A03) timeFreeze(v uint64) uint64 {
-	cpu.cyc += v
-	return cpu.cyc
+	cpu.freeze += v
+	return cpu.freeze
 }
 
 func (cpu *Cpu2A03) Reset() {
