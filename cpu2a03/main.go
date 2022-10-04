@@ -78,6 +78,7 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	}
 	if cpu.freeze > 0 {
 		v := cpu.freeze
+		cpu.cyc += v
 		cpu.freeze = 0
 		return v
 	}
@@ -104,6 +105,11 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	o.f(cpu, o.am)
 
 	cpu.cyc += uint64(o.cyc)
+
+	if cpu.freeze > 0 {
+		cpu.cyc += cpu.freeze
+		cpu.freeze = 0
+	}
 
 	cycdelta := cpu.cyc - cycstart
 
