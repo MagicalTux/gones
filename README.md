@@ -1,8 +1,8 @@
 # goNES
 
-NES emulator using ebitengine.
+NES emulator using [ebitengine](https://ebitengine.org/).
 
-PPU & APU are based on [Michael Fogleman's emulator](https://github.com/fogleman/nes), with added/removed bugs and more rewrites planned/needed. Because the CPU and the memory code isn't the same, the code isn't the same either, and I'm hoping to fully rewrite it eventually.
+PPU & APU are based on [Michael Fogleman's emulator](https://github.com/fogleman/nes), with added/removed bugs and more rewrites planned/needed. Because the CPU and the memory code isn't the same, the PPU/APU code isn't the same either, and I'm hoping to fully rewrite it eventually.
 
 MOS 6502 CPU is mostly implemented from scratch.
 
@@ -20,6 +20,8 @@ Clock uses a master clock at the frequency specified for NES, and divisors to fe
 * `nesclock` generate clock signals for the other parts of the system
 
 ## References
+
+### CPU
 
 * http://www.6502.org/tutorials/6502opcodes.html
 * https://www.masswerk.at/6502/6502_instruction_set.html
