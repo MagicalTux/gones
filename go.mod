@@ -3,7 +3,7 @@ module github.com/MagicalTux/gones
 go 1.18
 
 require (
-	github.com/hajimehoshi/ebiten/v2 v2.4.5
+	github.com/hajimehoshi/ebiten/v2 v2.4.7
 	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6
 )
 
