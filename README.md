@@ -18,6 +18,7 @@ Clock uses a master clock at the frequency specified for NES, and divisors to fe
 * `ppu` contains video rendering related code
 * `apu` contains audio code
 * `nesclock` generate clock signals for the other parts of the system
+* `nesinput` manages input devices (keyboard only for now)
 
 ## References
 
