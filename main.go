@@ -46,7 +46,7 @@ func (g *Game) Update() error {
 		} else {
 			log.Printf("Audio: setting buffer length to %s", apu.BufferLength())
 			player.SetBufferSize(apu.BufferLength())
-			go player.Play()
+			player.Play()
 		}
 	}
 
