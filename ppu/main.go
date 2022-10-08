@@ -145,7 +145,7 @@ func (p *PPU) Clock(cnt uint64) uint64 {
 			p.vblankDoNMI = true
 			p.stat |= VBlankStarted
 			p.Flip() // perform double buffer flip
-		case 0x00f10014: // scanline=241 cycle=20
+		case 0x00f10009: // scanline=241 cycle=9
 			p.vblankNMI = p.vblankDoNMI // generate NMI at next available occasion (slightly delayed compared to flag)
 		case 0x01050002: // scanline=261 cycle=1
 			// clear vblank, sprite, overflow

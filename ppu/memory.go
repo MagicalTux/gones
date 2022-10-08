@@ -25,7 +25,7 @@ func (p *PPU) MemRead(offset uint16) byte {
 			p.vblankDoNMI = false
 			stat &= ^VBlankStarted
 		}
-		if p.scanline == 241 && p.cycle <= 2 {
+		if p.scanline == 241 && p.cycle <= 3 {
 			// if we are within 2 PPU clocks of setting p.vblankFlag we should inhibit the NMI
 			p.vblankNMI = false
 			p.vblankDoNMI = false

@@ -85,12 +85,14 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 		return v
 	}
 
+	cycstart := cpu.cyc
+
 	if cpu.interrupt == InterruptNMI || (cpu.interrupt == InterruptIRQ && !cpu.getFlag(FlagInterruptDisable)) {
 		cpu.handleInterrupt(cpu.interrupt)
 		cpu.interrupt = InterruptNone
 	}
 
-	cycstart := cpu.cyc
+	cpu.checkPendingNMI()
 
 	pos := cpu.PC
 	// read value at PC
@@ -116,8 +118,6 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	}
 
 	cycdelta := cpu.cyc - cycstart
-
-	cpu.checkPendingNMI()
 
 	// number of cycles we've consumed in this run
 	return cycdelta
