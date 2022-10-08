@@ -2,6 +2,7 @@ package cpu2a03
 
 import (
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/MagicalTux/gones/apu"
@@ -32,6 +33,7 @@ type Cpu2A03 struct {
 	interrupt byte
 	nmiSig    byte // NMI timer
 	model     Model
+	Trace     io.Writer
 
 	cyc    uint64
 	freeze uint64
@@ -100,7 +102,9 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	}
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
 	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
-	//fmt.Fprintf(cpu.trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu)
+	if cpu.Trace != nil {
+		fmt.Fprintf(cpu.Trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu, cpu.PPU.Debug())
+	}
 
 	o.f(cpu, o.am)
 

@@ -1,7 +1,9 @@
 package ppu
 
 import (
+	"fmt"
 	"image"
+	"io"
 	"sync"
 
 	"github.com/MagicalTux/gones/memory"
@@ -59,6 +61,9 @@ type PPU struct {
 	front, back     *image.RGBA
 	frontLk         sync.Mutex
 	VBlankInterrupt func(byte)
+
+	// Debug trace
+	Trace io.Writer
 
 	sync chan *image.RGBA
 }
@@ -140,7 +145,7 @@ func (p *PPU) Clock(cnt uint64) uint64 {
 			p.vblankDoNMI = true
 			p.stat |= VBlankStarted
 			p.Flip() // perform double buffer flip
-		case 0x00f10009: // scanline=241 cycle=9
+		case 0x00f10014: // scanline=241 cycle=20
 			p.vblankNMI = p.vblankDoNMI // generate NMI at next available occasion (slightly delayed compared to flag)
 		case 0x01050002: // scanline=261 cycle=1
 			// clear vblank, sprite, overflow
@@ -190,7 +195,15 @@ func (p *PPU) checkPendingNMI() {
 	}
 }
 
+func (p *PPU) trace(msg string, arg ...any) {
+	if p.Trace == nil {
+		return
+	}
+	fmt.Fprintf(p.Trace, "%s: "+msg+"\n", append([]any{p.Debug()}, arg...)...)
+}
+
 func (p *PPU) sendInterrupt(v byte) {
+	p.trace("NMI sent")
 	if f := p.VBlankInterrupt; f != nil {
 		// trigger vblank interrupt
 		f(v)
@@ -207,4 +220,8 @@ func (p *PPU) getMask(m byte) bool {
 
 func (p *PPU) getStatus(m byte) bool {
 	return p.stat&m == m
+}
+
+func (p *PPU) Debug() string {
+	return fmt.Sprintf("PPU frame=%d %dx%d ctrl=$%02x mask=$%02x status=$%02x", p.frame, p.scanline, p.cycle, p.ctrl, p.mask, p.stat)
 }

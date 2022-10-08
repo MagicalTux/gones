@@ -7,10 +7,16 @@ import (
 
 func (p *PPU) MemRead(offset uint16) byte {
 	// only care about first 3 bits (&0x7)
+	if offset != 0x2002 {
+		p.trace("Memory read $%04x", offset)
+	}
 
 	switch offset & 7 {
 	case PPUSTATUS: // PPU status
 		stat := p.stat
+		if p.getStatus(VBlankStarted) {
+			p.trace("Crear VBlankStarted because PPUSTATUS read")
+		}
 		p.stat &= ^VBlankStarted // always clear VBlankStarted when reading PPU STATUS
 		p.W = false              // reading PPUSTATUS resets the PPUADDR latch
 		if p.scanline == 241 && p.cycle == 1 {
@@ -57,18 +63,30 @@ func (p *PPU) MemRead(offset uint16) byte {
 
 func (p *PPU) MemWrite(offset uint16, val byte) byte {
 	// only care about first 3 bits (&0x7)
+
 	switch offset & 7 {
 	case PPUCTRL:
-		if !p.getFlag(GenerateNMI) && val&GenerateNMI == GenerateNMI && p.getStatus(VBlankStarted) {
-			// enabling VBlankStarted will reset p.vblankNMI to p.vblankFlag and may trigger an extra NMI
-			// ??
-			p.vblankNMI = p.vblankDoNMI
+		p.trace("Write PPUCTRL → $%02x", val)
+		if !p.getFlag(GenerateNMI) && val&GenerateNMI == GenerateNMI {
+			if p.getStatus(VBlankStarted) {
+				p.trace("PPUCTRL: enabled NMI with VBL set, vblDoNmi=%v", p.vblankDoNMI)
+				// enabling VBlankStarted will reset p.vblankNMI to p.vblankFlag and may trigger an extra NMI
+				p.vblankNMI = p.vblankDoNMI
+			} else {
+				p.trace("PPUCTRL: enabled NMI, no VBL flag")
+				// we don't want to do NMI since it was enabled late
+				p.vblankDoNMI = false
+			}
+		}
+		if p.getFlag(GenerateNMI) && val&GenerateNMI == 0 {
+			p.trace("PPUCTRL: disabled NMI")
 		}
 		p.ctrl = val
 		// also affects T
 		// t: ....BA.. ........ = d: ......BA
 		p.T = (p.T & 0xF3FF) | ((uint16(val) & 0x03) << 10)
 	case PPUMASK:
+		p.trace("Write PPUMASK → $%02x", val)
 		p.mask = val
 	case OAMADDR:
 		p.oamAddr = val

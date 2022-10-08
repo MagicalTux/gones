@@ -15,6 +15,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
+var (
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	cputrace   = flag.String("trace", "", "write 6502 instructions to file")
+	ppudebug   = flag.String("ppudebug", "", "write PPU debug info to file, or - for stdout")
+	zoom       = flag.Int("zoom", 4, "zoom level for display")
+	startV     = flag.Int("start_v", 0, "define start position in RAM, for ex 0xc000")
+)
+
 type Game struct {
 	cpu     *cpu2a03.Cpu2A03
 	img     *ebiten.Image
@@ -25,6 +33,9 @@ func (g *Game) Update() error {
 	if !g.started {
 		g.started = true
 		g.cpu.Reset()
+		if *startV != 0 {
+			g.cpu.PC = uint16(*startV)
+		}
 		g.cpu.Start()
 
 		snd := audio.NewContext(44100)
@@ -51,9 +62,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return 256, 240
 }
-
-var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-var zoom = flag.Int("zoom", 4, "zoom level for display")
 
 func main() {
 	flag.Parse()
@@ -82,6 +90,25 @@ func main() {
 	cpu := cpu2a03.New(cpu2a03.NTSC)
 
 	cpu.Input[0] = nesinput.NewKeyboard()
+
+	if *cputrace != "" {
+		cpu.Trace, err = os.Create(*cputrace)
+		if err != nil {
+			log.Printf("Failed to create %s: %s", *cputrace, err)
+			os.Exit(1)
+		}
+	}
+	if *ppudebug != "" {
+		if *ppudebug == "-" {
+			cpu.PPU.Trace = os.Stdout
+		} else {
+			cpu.PPU.Trace, err = os.Create(*ppudebug)
+			if err != nil {
+				log.Printf("Failed to create %s: %s", *ppudebug, err)
+				os.Exit(1)
+			}
+		}
+	}
 
 	err = data.Setup(cpu)
 	if err != nil {
