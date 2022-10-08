@@ -2,6 +2,7 @@ package cartridge
 
 import (
 	"log"
+	"os"
 	"unsafe"
 
 	"github.com/MagicalTux/gones/cpu2a03"
@@ -43,6 +44,18 @@ type MMC1 struct {
 	prgBankSel  byte
 }
 
+type debugWrite struct {
+	memory.RAM
+}
+
+func (d *debugWrite) MemWrite(offset uint16, val byte) byte {
+	if val != 0 {
+		os.Stdout.Write([]byte{val})
+	}
+	//log.Printf("MMC1: debug write $%04x = $%02x", offset, val)
+	return d.RAM.MemWrite(offset, val)
+}
+
 func (m *MMC1) setup(cpu *cpu2a03.Cpu2A03) error {
 	cpu.Memory.MapHandler(0x6000, 0x2000, m)
 	cpu.Memory.MapHandler(0x8000, 0x8000, m)
@@ -52,7 +65,7 @@ func (m *MMC1) setup(cpu *cpu2a03.Cpu2A03) error {
 
 	// CPU $6000-$7FFF: Family Basic only: PRG RAM, mirrored as necessary to fill entire 8 KiB window, write protectable with an external switch
 	// we ignore numPRGram since value 0 means a 8kB RAM, value 1 means a 8kB ram, and higher values can't be addressed
-	m.prgRAM = memory.NewRAM(0x2000)
+	m.prgRAM = &debugWrite{memory.NewRAM(0x2000)}
 
 	// 2022/10/02 16:02:59 Parsed iNes1 file, 8*16kB PRG, 0*8kB CHR, 1*8kB PRG RAM, mapper=1, trainer=false mirroring=true/false
 

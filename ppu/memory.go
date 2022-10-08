@@ -44,10 +44,11 @@ func (p *PPU) MemRead(offset uint16) byte {
 		// See: https://www.nesdev.org/wiki/PPU_registers#The_PPUDATA_read_buffer_(post-fetch)
 		res := p.readBuf
 		p.readBuf = p.Memory.MemRead(p.V & 0x3fff)
-		if p.V > 0x3f00 {
+		if p.V >= 0x3f00 {
 			// return palette data instead
-			res = p.Palette[p.V%0x20]
+			res = p.Palette[palAddr(p.V)]
 		}
+		p.trace("PPUDATA read: $%04x = $%02x", p.V, res)
 		// increment p.V
 		if !p.getFlag(LargeIncrements) {
 			p.V += 1
@@ -120,9 +121,10 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 		}
 		return 0
 	case PPUDATA:
+		p.trace("PPUDATA write: $%04x = $%02x", p.V, val)
 		if p.V >= 0x3f00 {
 			// write to palette
-			p.Palette[p.V%0x20] = val
+			p.Palette[palAddr(p.V)] = val
 		} else {
 			p.Memory.MemWrite(p.V&0x3fff, val)
 		}
@@ -136,6 +138,19 @@ func (p *PPU) MemWrite(offset uint16, val byte) byte {
 		log.Printf("Unhandled PPU write: $%04x = $%02x", offset, val)
 	}
 	return 0
+}
+
+// palAddr returns the offset within the palette (0~31) for a given memory access address
+func palAddr(v uint16) uint16 {
+	v %= 0x20
+
+	// https://www.nesdev.org/wiki/PPU_palettes says:
+	// Addresses $3F10/$3F14/$3F18/$3F1C are mirrors of $3F00/$3F04/$3F08/$3F0C.
+	switch v {
+	case 0x10, 0x14, 0x18, 0x1c:
+		v &= 0x0c
+	}
+	return v
 }
 
 func (p *PPU) Ptr() uintptr {

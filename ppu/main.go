@@ -75,6 +75,7 @@ func New() *PPU {
 		back:            image.NewRGBA(image.Rect(0, 0, 256, 240)),
 		sync:            make(chan *image.RGBA),
 		nameTableMemory: memory.NewRAM(0x800), // NEW standard 2kB PPU work ram
+		Palette:         initialPalette,
 	}
 
 	// https://www.nesdev.org/wiki/PPU_memory_map
