@@ -76,7 +76,7 @@ func (p *PPU) renderPixel() {
 	} else {
 		// both background & sprite → collision
 		if p.spriteIndexes[i] == 0 && x < 255 {
-			p.stat &= SpriteZeroHit
+			p.stat |= SpriteZeroHit
 		}
 		// check sprite priority vs background
 		if p.spritePriorities[i] == 0 {
