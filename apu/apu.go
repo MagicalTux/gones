@@ -6,17 +6,13 @@ import (
 	"github.com/MagicalTux/gones/memory"
 )
 
-const CPUFrequency = 1789773
-const frameCounterRate = CPUFrequency / 240.0 // == 7457.3875
-
 type APU struct {
 	Memory    memory.Master
 	Input     [2]InputDevice // we put inputs here since the APU's buffer is used to talk to them
 	Interrupt func()
 	cpuDelay  func(uint64) uint64
 
-	channel    chan float32
-	sampleRate float64
+	channel chan float32
 
 	// instruments
 	pulse1   *Pulse
@@ -53,8 +49,6 @@ func New(mem memory.Master, t func(uint64) uint64) *APU {
 }
 
 func (apu *APU) setSampleRate(sampleRate float64) {
-	apu.sampleRate = CPUFrequency / sampleRate
-
 	// Initialize filters
 	apu.filterChain = FilterChain{
 		HighPassFilter(float32(sampleRate), 90),
