@@ -44,6 +44,7 @@ func New(mem memory.Master, t func(uint64) uint64) *APU {
 	}
 	res.dmc.apu = res
 	res.setSampleRate(44100) // standard NES sample rate
+	res.fillBuffer()         // fill audio buffer with zeroes
 
 	return res
 }

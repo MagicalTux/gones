@@ -14,6 +14,17 @@ func BufferLength() time.Duration {
 	return time.Duration(bufferedSamples * 22676 * time.Nanosecond)
 }
 
+func (apu *APU) fillBuffer() {
+	for {
+		select {
+		case apu.channel <- 0:
+			// ok
+		default:
+			return
+		}
+	}
+}
+
 func (apu *APU) sendSample() {
 	output := apu.filterChain.Step(apu.output())
 	select {
@@ -21,14 +32,13 @@ func (apu *APU) sendSample() {
 		apu.overrunWarning = false
 	default:
 		if !apu.overrunWarning {
-			log.Printf("WARNING: buffer overrun, emptying...")
+			log.Printf("WARNING: buffer overrun, emptying half...")
 			apu.overrunWarning = true
-		emptyloop:
-			for {
+			ln := len(apu.channel) / 2
+			for i := 0; i < ln; i += 1 {
 				select {
 				case <-apu.channel:
 				default:
-					break emptyloop
 				}
 			}
 		}
@@ -54,6 +64,8 @@ func (apu *APU) Read(b []byte) (int, error) {
 	n := 0
 	// signed 16bits little endian, 2 channel stereo
 	var v float32
+
+	//log.Printf("APU READ, len(channel) = %d", len(apu.channel))
 
 	for len(b) > 0 {
 		v = <-apu.channel // -1 ~ 1
