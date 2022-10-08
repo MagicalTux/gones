@@ -13,6 +13,7 @@ import (
 	"github.com/MagicalTux/gones/nesinput"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var (
@@ -27,6 +28,7 @@ type Game struct {
 	cpu     *cpu2a03.Cpu2A03
 	img     *ebiten.Image
 	started bool
+	gamepad ebiten.GamepadID
 }
 
 func (g *Game) Update() error {
@@ -46,7 +48,27 @@ func (g *Game) Update() error {
 			player.SetBufferSize(apu.BufferLength())
 			go player.Play()
 		}
+	}
 
+	if g.gamepad != 0 {
+		if inpututil.IsGamepadJustDisconnected(g.gamepad) {
+			// return to keyboard control
+			g.cpu.Input[0] = nesinput.NewKeyboard()
+			g.gamepad = 0
+		}
+	} else {
+		cn := inpututil.AppendJustConnectedGamepadIDs(nil)
+		if len(cn) > 0 {
+			// take first gamepad
+			id := cn[0]
+			pad, err := nesinput.NewGamepad(id)
+			if err != nil {
+				log.Printf("enable gamepad failed: %s", err)
+			} else {
+				g.gamepad = id
+				g.cpu.Input[0] = pad
+			}
+		}
 	}
 
 	return nil
