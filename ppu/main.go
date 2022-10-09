@@ -92,8 +92,9 @@ func New() *PPU {
 	return ppu
 }
 
-func (p *PPU) Reset(cnt uint64) {
+func (p *PPU) Reset() {
 	// cnt tells us at what point we need to reset, typically 7
+	cnt := 7        // default CPU reset point
 	pxls := cnt * 3 // =21
 
 	p.cycle = uint16(pxls)

@@ -5,10 +5,7 @@ import (
 	"io"
 	"log"
 
-	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/memory"
-	"github.com/MagicalTux/gones/nesclock"
-	"github.com/MagicalTux/gones/ppu"
 )
 
 const (
@@ -25,56 +22,20 @@ type Cpu2A03 struct {
 	P    byte   // status register
 
 	Memory    memory.Master
-	Clk       *nesclock.Master
-	PPU       *ppu.PPU
-	APU       *apu.APU
-	Input     []apu.InputDevice
 	fault     bool
 	interrupt byte
 	nmiSig    byte // NMI timer
-	model     Model
 	Trace     io.Writer
 
 	cyc    uint64
 	freeze uint64
 }
 
-func New(m Model) *Cpu2A03 {
-	cpu := &Cpu2A03{
-		Memory: memory.NewBus(),
-		Clk:    m.clock(),
-		model:  m,
-	}
-	cpu.PPU = ppu.New()
-	cpu.PPU.VBlankInterrupt = cpu.setNMI          // connect PPU's vblank to NMI
-	cpu.APU = apu.New(cpu.Memory, cpu.timeFreeze) // APU has access to the cpu's memory & clock
-	cpu.Input = cpu.APU.Input[:]
-	cpu.APU.Interrupt = cpu.IRQ
-
-	// setup RAM (2kB=0x800 bytes) with its mirrors
-	cpu.Memory.MapHandler(0x0000, 0x2000, memory.NewRAM(0x800))
-	cpu.Memory.MapHandler(0x2000, 0x2000, cpu.PPU) // PPU at 0x2000
-	cpu.Memory.MapHandler(0x4000, 0x2000, cpu.APU) // APU at 0x4000
-
-	return cpu
+func New() *Cpu2A03 {
+	return new(Cpu2A03)
 }
 
-// Typically this runs into a goroutine
-// go cpu.Start(cpu2a03.NTSC)
-func (cpu *Cpu2A03) Start() {
-	// trigger once every 12 clocks (if NTSC)
-	cpu.Clk.Listen(cpu.model.cpuIntv(), 0, cpu.clock)
-
-	// ppu & apu are run with a offset of 1 to ensure they run after the cpu
-	cpu.Clk.Listen(cpu.model.ppuIntv(), 1, cpu.PPU.Clock)
-
-	// apu needs 3 clocks
-	cpu.Clk.Listen(cpu.model.cpuIntv(), 1, cpu.APU.ClockCPU)
-	cpu.Clk.Listen(cpu.Clk.Frequency()/240, 1, cpu.APU.Clock240)
-	cpu.Clk.Listen(cpu.Clk.Frequency()/44100, 1, cpu.APU.Clock44100)
-}
-
-func (cpu *Cpu2A03) clock(uint64) uint64 {
+func (cpu *Cpu2A03) Clock(uint64) uint64 {
 	if cpu.fault {
 		return 9999
 	}
@@ -105,7 +66,7 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	//log.Printf("CPU Step: $%02x o=%v", e, o)
 	//log.Printf("CPU Step: [$%04x] %s %s", pos, o.i, o.am.Debug(cpu))
 	if cpu.Trace != nil {
-		fmt.Fprintf(cpu.Trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu, cpu.PPU.Debug())
+		fmt.Fprintf(cpu.Trace, "CPU Step cyc=%d: [$%04x] %s % -32s %s\n", cpu.cyc, pos, o.i, o.am.Debug(cpu), cpu)
 	}
 
 	o.f(cpu, o.am)
@@ -123,8 +84,8 @@ func (cpu *Cpu2A03) clock(uint64) uint64 {
 	return cycdelta
 }
 
-// timeFreeze is used to "freeze" the CPU by a number of cycles, delaying the next operation
-func (cpu *Cpu2A03) timeFreeze(v uint64) uint64 {
+// TimeFreeze is used to "freeze" the CPU by a number of cycles, delaying the next operation
+func (cpu *Cpu2A03) TimeFreeze(v uint64) uint64 {
 	cpu.freeze += v
 	return cpu.freeze
 }
@@ -141,8 +102,6 @@ func (cpu *Cpu2A03) Reset() {
 
 	// $FFFC-$FFFD = Reset vector
 	cpu.PC = cpu.Read16(ResetVector)
-
-	cpu.PPU.Reset(cpu.cyc)
 
 	log.Printf("CPU reset, new state = %s", cpu)
 }

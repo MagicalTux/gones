@@ -1,6 +1,8 @@
 package apu
 
 import (
+	"fmt"
+	"io"
 	"log"
 
 	"github.com/MagicalTux/gones/memory"
@@ -11,6 +13,7 @@ type APU struct {
 	Input     [2]InputDevice // we put inputs here since the APU's buffer is used to talk to them
 	Interrupt func()
 	cpuDelay  func(uint64) uint64
+	Trace     io.Writer
 
 	channel chan float32
 
@@ -220,4 +223,15 @@ func (apu *APU) writeFrameCounter(value byte) {
 		apu.stepSweep()
 		apu.stepLength()
 	}
+}
+
+func (apu *APU) trace(msg string, arg ...any) {
+	if apu.Trace == nil {
+		return
+	}
+	fmt.Fprintf(apu.Trace, "%s: "+msg+"\n", append([]any{apu.Debug()}, arg...)...)
+}
+
+func (apu *APU) Debug() string {
+	return fmt.Sprintf("APU [%d]", apu.cycle)
 }

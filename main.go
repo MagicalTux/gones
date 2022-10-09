@@ -9,23 +9,24 @@ import (
 
 	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/cartridge"
-	"github.com/MagicalTux/gones/cpu2a03"
 	"github.com/MagicalTux/gones/nesinput"
+	"github.com/MagicalTux/gones/pkgnes"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 var (
-	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file (Go's pprof)")
 	cputrace   = flag.String("trace", "", "write 6502 instructions to file")
-	ppudebug   = flag.String("ppudebug", "", "write PPU debug info to file, or - for stdout")
+	ppudebug   = flag.String("ppudebug", "", "write PPU (Picture Processing Unit) debug info to file, or - for stdout")
+	apudebug   = flag.String("apudebug", "", "write APU (Audio Processing Unit) debug info to file, or - for stdout")
 	zoom       = flag.Int("zoom", 4, "zoom level for display")
 	startV     = flag.Int("start_v", 0, "define start position in RAM, for ex 0xc000")
 )
 
 type Game struct {
-	cpu     *cpu2a03.Cpu2A03
+	nes     *pkgnes.NES
 	img     *ebiten.Image
 	started bool
 	gamepad ebiten.GamepadID
@@ -34,14 +35,14 @@ type Game struct {
 func (g *Game) Update() error {
 	if !g.started {
 		g.started = true
-		g.cpu.Reset()
+		g.nes.Reset()
 		if *startV != 0 {
-			g.cpu.PC = uint16(*startV)
+			g.nes.CPU.PC = uint16(*startV)
 		}
-		g.cpu.Start()
+		g.nes.Start()
 
 		snd := audio.NewContext(44100)
-		if player, err := snd.NewPlayer(g.cpu.APU); err != nil {
+		if player, err := snd.NewPlayer(g.nes.APU); err != nil {
 			log.Printf("failed to create player: %s", err)
 		} else {
 			log.Printf("Audio: setting buffer length to %s", apu.BufferLength())
@@ -53,7 +54,7 @@ func (g *Game) Update() error {
 	if g.gamepad != 0 {
 		if inpututil.IsGamepadJustDisconnected(g.gamepad) {
 			// return to keyboard control
-			g.cpu.Input[0] = nesinput.NewKeyboard()
+			g.nes.Input[0] = nesinput.NewKeyboard()
 			g.gamepad = 0
 		}
 	} else {
@@ -66,7 +67,7 @@ func (g *Game) Update() error {
 				log.Printf("enable gamepad failed: %s", err)
 			} else {
 				g.gamepad = id
-				g.cpu.Input[0] = pad
+				g.nes.Input[0] = pad
 			}
 		}
 	}
@@ -75,7 +76,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.cpu.PPU.Front(func(img *image.RGBA) {
+	g.nes.PPU.Front(func(img *image.RGBA) {
 		g.img.WritePixels(img.Pix)
 	})
 	screen.DrawImage(g.img, nil)
@@ -109,12 +110,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	cpu := cpu2a03.New(cpu2a03.NTSC)
+	nes := pkgnes.New(pkgnes.NTSC)
 
-	cpu.Input[0] = nesinput.NewKeyboard()
+	nes.Input[0] = nesinput.NewKeyboard()
 
 	if *cputrace != "" {
-		cpu.Trace, err = os.Create(*cputrace)
+		nes.CPU.Trace, err = os.Create(*cputrace)
 		if err != nil {
 			log.Printf("Failed to create %s: %s", *cputrace, err)
 			os.Exit(1)
@@ -122,30 +123,41 @@ func main() {
 	}
 	if *ppudebug != "" {
 		if *ppudebug == "-" {
-			cpu.PPU.Trace = os.Stdout
+			nes.PPU.Trace = os.Stdout
 		} else {
-			cpu.PPU.Trace, err = os.Create(*ppudebug)
+			nes.PPU.Trace, err = os.Create(*ppudebug)
 			if err != nil {
 				log.Printf("Failed to create %s: %s", *ppudebug, err)
 				os.Exit(1)
 			}
 		}
 	}
+	if *apudebug != "" {
+		if *apudebug == "-" {
+			nes.APU.Trace = os.Stdout
+		} else {
+			nes.APU.Trace, err = os.Create(*apudebug)
+			if err != nil {
+				log.Printf("Failed to create %s: %s", *apudebug, err)
+				os.Exit(1)
+			}
+		}
+	}
 
-	err = data.Setup(cpu)
+	err = data.Setup(nes)
 	if err != nil {
 		log.Printf("Failed to map %s: %s", arg[0], err)
 		os.Exit(1)
 	}
 
-	log.Printf("CPU ready with memory: %s", cpu.Memory)
-	log.Printf("PPU ready with memory: %s", cpu.PPU.Memory)
+	log.Printf("CPU ready with memory: %s", nes.Memory)
+	log.Printf("PPU ready with memory: %s", nes.PPU.Memory)
 
 	ebiten.SetWindowSize(256*(*zoom), 240*(*zoom))
 	ebiten.SetWindowTitle("goNES")
 
 	game := &Game{
-		cpu: cpu,
+		nes: nes,
 		img: ebiten.NewImage(256, 240),
 	}
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/MagicalTux/gones/cpu2a03"
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/pkgnes"
 	"github.com/MagicalTux/gones/ppu"
 )
 
@@ -56,12 +56,12 @@ func (d *debugWrite) MemWrite(offset uint16, val byte) byte {
 	return d.RAM.MemWrite(offset, val)
 }
 
-func (m *MMC1) setup(cpu *cpu2a03.Cpu2A03) error {
-	cpu.Memory.MapHandler(0x6000, 0x2000, m)
-	cpu.Memory.MapHandler(0x8000, 0x8000, m)
-	cpu.PPU.Memory.MapHandler(0x0000, 0x2000, m)
+func (m *MMC1) setup(nes *pkgnes.NES) error {
+	nes.Memory.MapHandler(0x6000, 0x2000, m)
+	nes.Memory.MapHandler(0x8000, 0x8000, m)
+	nes.PPU.Memory.MapHandler(0x0000, 0x2000, m)
 
-	m.ppu = cpu.PPU
+	m.ppu = nes.PPU
 
 	// CPU $6000-$7FFF: Family Basic only: PRG RAM, mirrored as necessary to fill entire 8 KiB window, write protectable with an external switch
 	// we ignore numPRGram since value 0 means a 8kB RAM, value 1 means a 8kB ram, and higher values can't be addressed

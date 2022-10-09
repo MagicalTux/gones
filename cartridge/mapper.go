@@ -1,11 +1,11 @@
 package cartridge
 
-import "github.com/MagicalTux/gones/cpu2a03"
+import "github.com/MagicalTux/gones/pkgnes"
 
 type MapperType byte
 
 type Mapper interface {
-	setup(cpu *cpu2a03.Cpu2A03) error
+	setup(nes *pkgnes.NES) error
 }
 
 var mappers = make(map[MapperType]func(*Data) Mapper)

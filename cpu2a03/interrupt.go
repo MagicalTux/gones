@@ -33,7 +33,7 @@ func (cpu *Cpu2A03) handleInterrupt(i byte) {
 	cpu.cyc += 7
 }
 
-func (cpu *Cpu2A03) setNMI(v byte) {
+func (cpu *Cpu2A03) SetNMI(v byte) {
 	cpu.nmiSig = v
 }
 

@@ -1,4 +1,4 @@
-package cpu2a03
+package pkgnes
 
 import "github.com/MagicalTux/gones/nesclock"
 
@@ -9,7 +9,7 @@ const (
 	PAL
 )
 
-func (m Model) clock() *nesclock.Master {
+func (m Model) newClock() *nesclock.Master {
 	switch m {
 	case NTSC:
 		return nesclock.New(nesclock.NTSC)
