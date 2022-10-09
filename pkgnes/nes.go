@@ -9,13 +9,13 @@ import (
 )
 
 type NES struct {
-	Memory memory.Master
-	Clk    *clock.Master
-	CPU    *cpu6502.CPU
-	PPU    *nesppu.PPU
-	APU    *nesapu.APU
-	Input  []nesapu.InputDevice
-	model  Model
+	Memory memory.Master        // shared bus memory used by CPU, etc
+	Clk    *clock.Master        // master clock
+	CPU    *cpu6502.CPU         // Central Processing Unit
+	PPU    *nesppu.PPU          // Picture Processing Unit
+	APU    *nesapu.APU          // Audio Processing Unit
+	Input  []nesapu.InputDevice // Input devices
+	model  Model                // This NES's Model, NTSC or PAL
 }
 
 func New(model Model) *NES {
@@ -37,12 +37,8 @@ func New(model Model) *NES {
 	nes.Memory.MapHandler(0x2000, 0x2000, nes.PPU) // PPU at 0x2000
 	nes.Memory.MapHandler(0x4000, 0x2000, nes.APU) // APU at 0x4000
 
-	return nes
-}
+	// setup clock:
 
-// Typically this runs into a goroutine
-// go nes.Start(pkgnes.NTSC)
-func (nes *NES) Start() {
 	// trigger once every 12 clocks (if NTSC)
 	nes.Clk.Listen(nes.model.cpuIntv(), 0, nes.CPU.Clock)
 
@@ -53,6 +49,14 @@ func (nes *NES) Start() {
 	nes.Clk.Listen(nes.model.cpuIntv(), 1, nes.APU.ClockCPU)
 	nes.Clk.Listen(nes.Clk.Frequency()/240, 1, nes.APU.Clock240)
 	nes.Clk.Listen(nes.Clk.Frequency()/44100, 1, nes.APU.Clock44100)
+
+	return nes
+}
+
+// Typically this runs into a goroutine
+// go nes.Start(pkgnes.NTSC)
+func (nes *NES) Start() {
+	nes.Clk.Start()
 }
 
 func (nes *NES) Reset() {

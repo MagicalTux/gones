@@ -9,14 +9,24 @@ import (
 
 type ClockInput func(uint64) uint64
 
+type ClockState int
+
+const (
+	Stopped ClockState = iota
+	Running
+	OneStep
+)
+
 type Master struct {
-	freq uint64        // number of clocks per second
-	step uint64        // hz per cycle
-	intv time.Duration // duration of a cycle
-	pos  uint64        // clocks so far
-	now  time.Time
-	next *Listener
-	mu   sync.Mutex
+	freq  uint64        // number of clocks per second
+	step  uint64        // hz per cycle
+	intv  time.Duration // duration of a cycle
+	pos   uint64        // clocks so far
+	state ClockState
+	now   time.Time
+	next  *Listener
+	mu    sync.Mutex
+	cd    *sync.Cond
 }
 
 // New returns a new clock running at the given frequency, using the specified
@@ -63,6 +73,8 @@ func New(freq uint64) *Master {
 		intv: intv,
 		now:  time.Now(),
 	}
+	res.cd = sync.NewCond(&res.mu)
+
 	go res.thread()
 
 	// Sample usage:
@@ -161,11 +173,40 @@ func (m *Master) takeNext() *Listener {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+stateLoop:
+	for {
+		switch m.state {
+		case Running:
+			break stateLoop
+		case Stopped:
+			m.cd.Wait()
+		case OneStep:
+			m.state = Stopped
+			break stateLoop
+		}
+	}
+
 	next := m.next
 	if next != nil {
 		m.next = next.next
 	}
 	return next
+}
+
+func (m *Master) Start() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.state = Running
+	m.now = time.Now() // reset wallclock time
+	m.cd.Broadcast()   // wake thread if needed
+}
+
+func (m *Master) Stop() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.state = Stopped
 }
 
 func (m *Master) insert(l *Listener) {
