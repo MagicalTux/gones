@@ -12,11 +12,12 @@ Clock uses a master clock at the frequency specified for NES, and divisors to fe
 
 ## Structure
 
-* `cpu2a03` contains the CPU emulation
+* `pkgnes` is the base NES package that will instanciate the various required elements
+* `cpu6502` contains the CPU emulation
 * `memory` contains memory primitives such as the bus, RAM and ROM
-* `cartridge` has code to load a cartridge and map it on the CPU's bus
-* `ppu` contains video rendering related code
-* `apu` contains audio code
+* `nescartridge` has code to load a cartridge and map it on the CPU's bus
+* `nesppu` contains video rendering related code
+* `nesapu` contains audio code
 * `nesclock` generate clock signals for the other parts of the system
 * `nesinput` manages input devices (keyboard only for now)
 
