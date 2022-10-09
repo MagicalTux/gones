@@ -224,5 +224,5 @@ func (p *PPU) getStatus(m byte) bool {
 }
 
 func (p *PPU) Debug() string {
-	return fmt.Sprintf("PPU frame=%d %dx%d ctrl=$%02x mask=$%02x status=$%02x", p.frame, p.scanline, p.cycle, p.ctrl, p.mask, p.stat)
+	return fmt.Sprintf("PPU [f#%d(%03dx%03d) CMS=$%02x/$%02x/$%02x]", p.frame, p.scanline, p.cycle, p.ctrl, p.mask, p.stat)
 }
