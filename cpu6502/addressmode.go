@@ -1,4 +1,4 @@
-package cpu2a03
+package cpu6502
 
 import (
 	"fmt"
@@ -39,7 +39,7 @@ const (
 	amZpgY
 )
 
-func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
+func (am AddressMode) Addr(cpu *CPU) uint16 {
 	switch am {
 	case amAcc:
 		panic("amAcc.Addr()")
@@ -100,7 +100,7 @@ func (am AddressMode) Addr(cpu *Cpu2A03) uint16 {
 	}
 }
 
-func (am AddressMode) AddrFast(cpu *Cpu2A03) uint16 {
+func (am AddressMode) AddrFast(cpu *CPU) uint16 {
 	switch am {
 	case amAbsX:
 		addr := cpu.ReadPC16()
@@ -122,7 +122,7 @@ func (am AddressMode) AddrFast(cpu *Cpu2A03) uint16 {
 	}
 }
 
-func (am AddressMode) Read(cpu *Cpu2A03) byte {
+func (am AddressMode) Read(cpu *CPU) byte {
 	switch am {
 	case amAcc:
 		return cpu.A
@@ -138,7 +138,7 @@ func (am AddressMode) Read(cpu *Cpu2A03) byte {
 	}
 }
 
-func (am AddressMode) Write(cpu *Cpu2A03, v byte) {
+func (am AddressMode) Write(cpu *CPU, v byte) {
 	switch am {
 	case amAcc:
 		cpu.A = v
@@ -155,7 +155,7 @@ func (am AddressMode) Write(cpu *Cpu2A03, v byte) {
 }
 
 // WriteFast writes without losing cycles
-func (am AddressMode) WriteFast(cpu *Cpu2A03, v byte) {
+func (am AddressMode) WriteFast(cpu *CPU, v byte) {
 	switch am {
 	case amAbsX, amAbsY, amIndY:
 		cpu.Memory.MemWrite(am.AddrFast(cpu), v)
@@ -164,7 +164,7 @@ func (am AddressMode) WriteFast(cpu *Cpu2A03, v byte) {
 	}
 }
 
-func (am AddressMode) Debug(cpu *Cpu2A03) string {
+func (am AddressMode) Debug(cpu *CPU) string {
 	switch am {
 	case amAcc:
 		return fmt.Sprintf("A = $%02x", cpu.A)
@@ -218,7 +218,7 @@ func (am AddressMode) Length() int {
 	}
 }
 
-func (am AddressMode) Implied(cpu *Cpu2A03) {
+func (am AddressMode) Implied(cpu *CPU) {
 	if am == amImpl {
 		return
 	}

@@ -1,4 +1,4 @@
-package cpu2a03
+package cpu6502
 
 import "log"
 
@@ -8,17 +8,17 @@ const (
 	InterruptNMI
 )
 
-func (cpu *Cpu2A03) NMI() {
+func (cpu *CPU) NMI() {
 	cpu.interrupt = InterruptNMI
 }
 
-func (cpu *Cpu2A03) IRQ() {
+func (cpu *CPU) IRQ() {
 	if cpu.interrupt < InterruptIRQ {
 		cpu.interrupt = InterruptIRQ
 	}
 }
 
-func (cpu *Cpu2A03) handleInterrupt(i byte) {
+func (cpu *CPU) handleInterrupt(i byte) {
 	// handle interrupt
 	cpu.Push16(cpu.PC)
 	cpu.Push(cpu.P) // | FlagBreak)
@@ -33,11 +33,11 @@ func (cpu *Cpu2A03) handleInterrupt(i byte) {
 	cpu.cyc += 7
 }
 
-func (cpu *Cpu2A03) SetNMI(v byte) {
+func (cpu *CPU) SetNMI(v byte) {
 	cpu.nmiSig = v
 }
 
-func (cpu *Cpu2A03) checkPendingNMI() {
+func (cpu *CPU) checkPendingNMI() {
 	if cpu.nmiSig > 0 {
 		cpu.nmiSig -= 1
 		if cpu.nmiSig == 0 {
@@ -46,7 +46,7 @@ func (cpu *Cpu2A03) checkPendingNMI() {
 	}
 }
 
-func brk(cpu *Cpu2A03, am AddressMode) {
+func brk(cpu *CPU, am AddressMode) {
 	cpu.PC += 1
 	cpu.Push16(cpu.PC)
 	cpu.Push(cpu.P | FlagBreak)
@@ -55,7 +55,7 @@ func brk(cpu *Cpu2A03, am AddressMode) {
 	cpu.setFlag(FlagInterruptDisable, true)
 }
 
-func rti(cpu *Cpu2A03, am AddressMode) {
+func rti(cpu *CPU, am AddressMode) {
 	p := cpu.Pull()
 	p &= ^byte(0x30)  // ignore B and bit5
 	p |= cpu.P & 0x30 // load B and bit5 from P
@@ -64,12 +64,12 @@ func rti(cpu *Cpu2A03, am AddressMode) {
 	cpu.PC = cpu.Pull16()
 }
 
-func stop(cpu *Cpu2A03, am AddressMode) {
+func stop(cpu *CPU, am AddressMode) {
 	log.Printf("CPU: STOP instruction at $%04x", cpu.PC-1)
 	cpu.fault = true
 }
 
-func nop(cpu *Cpu2A03, am AddressMode) {
+func nop(cpu *CPU, am AddressMode) {
 	switch am {
 	case amImpl:
 		// implicit: do nothing

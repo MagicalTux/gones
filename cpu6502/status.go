@@ -1,4 +1,4 @@
-package cpu2a03
+package cpu6502
 
 /*
 MNEMONIC                       HEX
@@ -11,37 +11,37 @@ CLD (CLear Decimal)            $D8
 SED (SEt Decimal)              $F8
 */
 
-func clc(cpu *Cpu2A03, am AddressMode) {
+func clc(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P &= ^FlagCarry
 }
 
-func sec(cpu *Cpu2A03, am AddressMode) {
+func sec(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P |= FlagCarry
 }
 
-func cli(cpu *Cpu2A03, am AddressMode) {
+func cli(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P &= ^FlagInterruptDisable
 }
 
-func sei(cpu *Cpu2A03, am AddressMode) {
+func sei(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P |= FlagInterruptDisable
 }
 
-func clv(cpu *Cpu2A03, am AddressMode) {
+func clv(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P &= ^FlagOverflow
 }
 
-func cld(cpu *Cpu2A03, am AddressMode) {
+func cld(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P &= ^FlagDecimal
 }
 
-func sed(cpu *Cpu2A03, am AddressMode) {
+func sed(cpu *CPU, am AddressMode) {
 	am.Implied(cpu)
 	cpu.P |= FlagDecimal
 }

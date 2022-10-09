@@ -1,27 +1,27 @@
-package cpu2a03
+package cpu6502
 
-func cmp(cpu *Cpu2A03, am AddressMode) {
+func cmp(cpu *CPU, am AddressMode) {
 	// compare A with value
 	// A - M
 
 	cpu.compare(cpu.A, am.Read(cpu))
 }
 
-func cpx(cpu *Cpu2A03, am AddressMode) {
+func cpx(cpu *CPU, am AddressMode) {
 	// compare X with value
 	// X - M
 
 	cpu.compare(cpu.X, am.Read(cpu))
 }
 
-func cpy(cpu *Cpu2A03, am AddressMode) {
+func cpy(cpu *CPU, am AddressMode) {
 	// compare X with value
 	// Y - M
 
 	cpu.compare(cpu.Y, am.Read(cpu))
 }
 
-func adc(cpu *Cpu2A03, am AddressMode) {
+func adc(cpu *CPU, am AddressMode) {
 	// Add Memory to Accumulator with Carry
 	// A + M + C -> A, C
 	v := am.Read(cpu)
@@ -39,7 +39,7 @@ func adc(cpu *Cpu2A03, am AddressMode) {
 	cpu.setFlag(FlagOverflow, (a^v)&0x80 == 0 && (a^cpu.A)&0x80 != 0)
 }
 
-func sbc(cpu *Cpu2A03, am AddressMode) {
+func sbc(cpu *CPU, am AddressMode) {
 	// Subtract Memory from Accumulator with Borrow
 	// A - M - C -> A
 	v := am.Read(cpu)
@@ -57,7 +57,7 @@ func sbc(cpu *Cpu2A03, am AddressMode) {
 	cpu.setFlag(FlagOverflow, (a^v)&0x80 != 0 && (a^cpu.A)&0x80 != 0)
 }
 
-func inc(cpu *Cpu2A03, am AddressMode) {
+func inc(cpu *CPU, am AddressMode) {
 	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 	v += 1
@@ -65,7 +65,7 @@ func inc(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(v)
 }
 
-func dec(cpu *Cpu2A03, am AddressMode) {
+func dec(cpu *CPU, am AddressMode) {
 	addr := am.AddrFast(cpu)
 	v := cpu.Memory.MemRead(addr)
 	v -= 1
@@ -73,7 +73,7 @@ func dec(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(v)
 }
 
-func dcp(cpu *Cpu2A03, am AddressMode) {
+func dcp(cpu *CPU, am AddressMode) {
 	// M - 1 -> M, A - M
 	// Flags: N Z C
 	addr := am.AddrFast(cpu)
@@ -85,7 +85,7 @@ func dcp(cpu *Cpu2A03, am AddressMode) {
 	cpu.setFlag(FlagCarry, int(cpu.A)-int(v) >= 0)
 }
 
-func isc(cpu *Cpu2A03, am AddressMode) {
+func isc(cpu *CPU, am AddressMode) {
 	// INC oper + SBC oper
 	// M + 1 -> M, A - M - C -> A
 	// Flags: N Z C V

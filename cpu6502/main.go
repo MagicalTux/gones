@@ -1,4 +1,4 @@
-package cpu2a03
+package cpu6502
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ const (
 	IRQVector   = 0xfffe
 )
 
-type Cpu2A03 struct {
+type CPU struct {
 	A    byte   // accumulator
 	X, Y byte   // registers
 	PC   uint16 // program counter
@@ -31,11 +31,11 @@ type Cpu2A03 struct {
 	freeze uint64
 }
 
-func New() *Cpu2A03 {
-	return new(Cpu2A03)
+func New() *CPU {
+	return new(CPU)
 }
 
-func (cpu *Cpu2A03) Clock(uint64) uint64 {
+func (cpu *CPU) Clock(uint64) uint64 {
 	if cpu.fault {
 		return 9999
 	}
@@ -58,7 +58,7 @@ func (cpu *Cpu2A03) Clock(uint64) uint64 {
 	pos := cpu.PC
 	// read value at PC
 	e := cpu.ReadPC()
-	o := cpu2a03op[e]
+	o := cpu6502op[e]
 	if o == nil || o.f == nil {
 		cpu.fatal("FATAL CPU ERROR - unsupported op $%02x @ $%04x / %s", e, pos, cpu)
 		return 9999
@@ -85,12 +85,12 @@ func (cpu *Cpu2A03) Clock(uint64) uint64 {
 }
 
 // TimeFreeze is used to "freeze" the CPU by a number of cycles, delaying the next operation
-func (cpu *Cpu2A03) TimeFreeze(v uint64) uint64 {
+func (cpu *CPU) TimeFreeze(v uint64) uint64 {
 	cpu.freeze += v
 	return cpu.freeze
 }
 
-func (cpu *Cpu2A03) Reset() {
+func (cpu *CPU) Reset() {
 	// reset
 	cpu.A = 0
 	cpu.X = 0
@@ -106,58 +106,58 @@ func (cpu *Cpu2A03) Reset() {
 	log.Printf("CPU reset, new state = %s", cpu)
 }
 
-func (cpu *Cpu2A03) fatal(v string, a ...any) {
+func (cpu *CPU) fatal(v string, a ...any) {
 	cpu.fault = true
 	log.Printf("CPU FAULT: "+v, a...)
 }
 
-func (cpu *Cpu2A03) ReadPC() uint8 {
+func (cpu *CPU) ReadPC() uint8 {
 	v := cpu.Memory.MemRead(cpu.PC)
 	cpu.PC += 1
 	return v
 }
 
-func (cpu *Cpu2A03) ReadPC16() uint16 {
+func (cpu *CPU) ReadPC16() uint16 {
 	v := cpu.Read16(cpu.PC)
 	cpu.PC += 2
 	return v
 }
 
-func (cpu *Cpu2A03) PeekPC() uint8 {
+func (cpu *CPU) PeekPC() uint8 {
 	return cpu.Memory.MemRead(cpu.PC)
 }
 
-func (cpu *Cpu2A03) PeekPC16() uint16 {
+func (cpu *CPU) PeekPC16() uint16 {
 	return cpu.Read16(cpu.PC)
 }
 
-func (cpu *Cpu2A03) Push(v byte) {
+func (cpu *CPU) Push(v byte) {
 	//cpu.msg("CPU Stack push $%02x", v)
 	cpu.Memory.MemWrite(0x100+uint16(cpu.S), v)
 	cpu.S -= 1
 }
 
-func (cpu *Cpu2A03) Pull() byte {
+func (cpu *CPU) Pull() byte {
 	cpu.S += 1
 	v := cpu.Memory.MemRead(0x100 + uint16(cpu.S))
 	//cpu.msg("CPU Stack pull $%02x S=%02x", v, cpu.S)
 	return v
 }
 
-func (cpu *Cpu2A03) Push16(v uint16) {
+func (cpu *CPU) Push16(v uint16) {
 	// TODO is this the right order?
 	cpu.Push(uint8((v >> 8) & 0xff))
 	cpu.Push(uint8(v & 0xff))
 }
 
-func (cpu *Cpu2A03) Pull16() uint16 {
+func (cpu *CPU) Pull16() uint16 {
 	var v uint16
 	v = uint16(cpu.Pull())
 	v |= uint16(cpu.Pull()) << 8
 	return v
 }
 
-func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
+func (cpu *CPU) Read16(offt uint16) uint16 {
 	// little endian read
 	a := cpu.Memory.MemRead(offt)
 	b := cpu.Memory.MemRead(offt + 1)
@@ -165,7 +165,7 @@ func (cpu *Cpu2A03) Read16(offt uint16) uint16 {
 	return uint16(a) | uint16(b)<<8
 }
 
-func (cpu *Cpu2A03) Read16W(offt uint16) uint16 {
+func (cpu *CPU) Read16W(offt uint16) uint16 {
 	// little endian read wrapping around current page
 	a := cpu.Memory.MemRead(offt)
 	if offt&0xff == 0xff {
@@ -179,6 +179,6 @@ func (cpu *Cpu2A03) Read16W(offt uint16) uint16 {
 	return uint16(a) | uint16(b)<<8
 }
 
-func (cpu *Cpu2A03) String() string {
+func (cpu *CPU) String() string {
 	return fmt.Sprintf("CPU:2A03 [A=%02x X=%02x Y=%02x PC=%04x S=%02x P=%02x]", cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.S, cpu.P)
 }

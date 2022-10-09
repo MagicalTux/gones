@@ -1,6 +1,6 @@
-package cpu2a03
+package cpu6502
 
-func slo(cpu *Cpu2A03, am AddressMode) {
+func slo(cpu *CPU, am AddressMode) {
 	// ASL oper + ORA oper
 	// M = C <- [76543210] <- 0, A OR M -> A
 	//Flags: N Z C
@@ -20,7 +20,7 @@ func slo(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func rla(cpu *Cpu2A03, am AddressMode) {
+func rla(cpu *CPU, am AddressMode) {
 	// ROL oper + AND oper
 	// M = C <- [76543210] <- C, A AND M -> A
 	// Flags: N Z C
@@ -42,7 +42,7 @@ func rla(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func sre(cpu *Cpu2A03, am AddressMode) {
+func sre(cpu *CPU, am AddressMode) {
 	// LSR oper + EOR oper
 	// M = 0 -> [76543210] -> C, A EOR M -> A
 	// Flags: N Z C
@@ -58,7 +58,7 @@ func sre(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func rra(cpu *Cpu2A03, am AddressMode) {
+func rra(cpu *CPU, am AddressMode) {
 	// ROR oper + ADC oper
 	// M = C -> [76543210] -> C, A + M + C -> A, C
 	// Flags: N Z C V
@@ -87,7 +87,7 @@ func rra(cpu *Cpu2A03, am AddressMode) {
 	cpu.setFlag(FlagOverflow, (a^v)&0x80 == 0 && (a^cpu.A)&0x80 != 0)
 }
 
-func anc(cpu *Cpu2A03, am AddressMode) {
+func anc(cpu *CPU, am AddressMode) {
 	// AND oper + set C as ASL
 	// A AND oper, bit(7) -> C
 	// Flags: N Z C
@@ -103,7 +103,7 @@ func anc(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func alr(cpu *Cpu2A03, am AddressMode) {
+func alr(cpu *CPU, am AddressMode) {
 	// AND oper + LSR
 	// A AND oper, 0 -> [76543210] -> C
 	// Flags: N Z C
@@ -126,7 +126,7 @@ func alr(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func arr(cpu *Cpu2A03, am AddressMode) {
+func arr(cpu *CPU, am AddressMode) {
 	// AND oper + ROR
 	// A AND oper, C -> [76543210] -> C
 	// Flags: N Z C V
@@ -163,7 +163,7 @@ func arr(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func ane(cpu *Cpu2A03, am AddressMode) {
+func ane(cpu *CPU, am AddressMode) {
 	// * AND X + AND oper
 	// Highly unstable, do not use.
 	// A base value in A is determined based on the contets of A and a constant, which may be typically $00, $ff, $ee, etc. The value of this constant depends on temerature, the chip series, and maybe other factors, as well.
@@ -177,7 +177,7 @@ func ane(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func lxa(cpu *Cpu2A03, am AddressMode) {
+func lxa(cpu *CPU, am AddressMode) {
 	// Opcode AB
 	// also known as OAL or ATX
 	// Store * AND oper in A and X
@@ -201,7 +201,7 @@ func lxa(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func las(cpu *Cpu2A03, am AddressMode) {
+func las(cpu *CPU, am AddressMode) {
 	// LDA/TSX oper
 	// M AND SP -> A, X, SP
 	// Flags: N Z
@@ -220,7 +220,7 @@ func las(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(v)
 }
 
-func sha(cpu *Cpu2A03, am AddressMode) {
+func sha(cpu *CPU, am AddressMode) {
 	// Stores A AND X AND (high-byte of addr. + 1) at addr.
 	// unstable: sometimes 'AND (H+1)' is dropped, page boundary crossings may not work (with the high-byte of the value used as the high-byte of the address)
 	// A AND X AND (H+1) -> M
@@ -231,7 +231,7 @@ func sha(cpu *Cpu2A03, am AddressMode) {
 	cpu.Memory.MemWrite(addr, v)
 }
 
-func sbx(cpu *Cpu2A03, am AddressMode) {
+func sbx(cpu *CPU, am AddressMode) {
 	// CMP and DEX at once, sets flags like CMP
 	// (A AND X) - oper -> X
 
@@ -251,7 +251,7 @@ func sbx(cpu *Cpu2A03, am AddressMode) {
 	cpu.compare(a, v)
 }
 
-func shy(cpu *Cpu2A03, am AddressMode) {
+func shy(cpu *CPU, am AddressMode) {
 	// Opcode 9C
 	// Also known as: A11, SYA, SAY
 	// Stores Y AND (high-byte of addr. + 1) at addr.
@@ -262,7 +262,7 @@ func shy(cpu *Cpu2A03, am AddressMode) {
 	cpu.Memory.MemWrite(addr, cpu.Y&uint8((addr>>8)+1))
 }
 
-func tas(cpu *Cpu2A03, am AddressMode) {
+func tas(cpu *CPU, am AddressMode) {
 	// Opcode 9B
 	// Also known as XAS, SHS
 	// Puts A AND X in SP and stores A AND X AND (high-byte of addr. + 1) at addr.
@@ -274,7 +274,7 @@ func tas(cpu *Cpu2A03, am AddressMode) {
 	cpu.Memory.MemWrite(addr, cpu.A&cpu.X&uint8((addr>>8)+1))
 }
 
-func shx(cpu *Cpu2A03, am AddressMode) {
+func shx(cpu *CPU, am AddressMode) {
 	// Opcode 9E
 	// Also known as A11, SXA, XAS
 	// Stores X AND (high-byte of addr. + 1) at addr.

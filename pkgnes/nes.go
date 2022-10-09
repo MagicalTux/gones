@@ -2,7 +2,7 @@ package pkgnes
 
 import (
 	"github.com/MagicalTux/gones/apu"
-	"github.com/MagicalTux/gones/cpu2a03"
+	"github.com/MagicalTux/gones/cpu6502"
 	"github.com/MagicalTux/gones/memory"
 	"github.com/MagicalTux/gones/nesclock"
 	"github.com/MagicalTux/gones/ppu"
@@ -11,7 +11,7 @@ import (
 type NES struct {
 	Memory memory.Master
 	Clk    *nesclock.Master
-	CPU    *cpu2a03.Cpu2A03
+	CPU    *cpu6502.CPU
 	PPU    *ppu.PPU
 	APU    *apu.APU
 	Input  []apu.InputDevice
@@ -22,7 +22,7 @@ func New(model Model) *NES {
 	nes := &NES{
 		Memory: memory.NewBus(),
 		Clk:    model.newClock(),
-		CPU:    cpu2a03.New(),
+		CPU:    cpu6502.New(),
 		PPU:    ppu.New(),
 	}
 	nes.CPU.Memory = nes.Memory              // connect main memory bus to CPU

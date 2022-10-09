@@ -1,6 +1,6 @@
-package cpu2a03
+package cpu6502
 
-func ora(cpu *Cpu2A03, am AddressMode) {
+func ora(cpu *CPU, am AddressMode) {
 	// Affects Flags: N Z
 	v := am.Read(cpu)
 
@@ -8,7 +8,7 @@ func ora(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsNZ(cpu.A)
 }
 
-func bit(cpu *Cpu2A03, am AddressMode) {
+func bit(cpu *CPU, am AddressMode) {
 	v := am.Read(cpu)
 	// bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
 	// the zero-flag is set to the result of operand AND accumulator.
@@ -20,21 +20,21 @@ func bit(cpu *Cpu2A03, am AddressMode) {
 	cpu.flagsN(v)
 }
 
-func and(cpu *Cpu2A03, am AddressMode) {
+func and(cpu *CPU, am AddressMode) {
 	v := am.Read(cpu)
 
 	cpu.A &= v
 	cpu.flagsNZ(cpu.A)
 }
 
-func eor(cpu *Cpu2A03, am AddressMode) {
+func eor(cpu *CPU, am AddressMode) {
 	v := am.Read(cpu)
 
 	cpu.A ^= v
 	cpu.flagsNZ(cpu.A)
 }
 
-func ror(cpu *Cpu2A03, am AddressMode) {
+func ror(cpu *CPU, am AddressMode) {
 	c := byte(0)
 	if cpu.getFlag(FlagCarry) {
 		c = 1
@@ -57,7 +57,7 @@ func ror(cpu *Cpu2A03, am AddressMode) {
 	}
 }
 
-func lsr(cpu *Cpu2A03, am AddressMode) {
+func lsr(cpu *CPU, am AddressMode) {
 	if am == amAcc {
 		cpu.setFlag(FlagCarry, cpu.A&1 == 1)
 		cpu.A >>= 1
@@ -73,7 +73,7 @@ func lsr(cpu *Cpu2A03, am AddressMode) {
 	}
 }
 
-func asl(cpu *Cpu2A03, am AddressMode) {
+func asl(cpu *CPU, am AddressMode) {
 	if am == amAcc {
 		cpu.setFlag(FlagCarry, cpu.A&0x80 == 0x80)
 		cpu.A <<= 1
@@ -89,7 +89,7 @@ func asl(cpu *Cpu2A03, am AddressMode) {
 	}
 }
 
-func rol(cpu *Cpu2A03, am AddressMode) {
+func rol(cpu *CPU, am AddressMode) {
 	c := byte(0)
 	if cpu.getFlag(FlagCarry) {
 		c = 1

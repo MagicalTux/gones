@@ -1,4 +1,4 @@
-package cpu2a03
+package cpu6502
 
 // Flags set in cpu.P
 const (
@@ -38,21 +38,21 @@ result is 1, or, both operands have the sign-bit set, but the result is positive
 */
 
 // flagsNZ will set both N and Z flags according to v. This is a very common case
-func (cpu *Cpu2A03) flagsNZ(v byte) {
+func (cpu *CPU) flagsNZ(v byte) {
 	// set flags N & Z based on value v
 	cpu.setFlag(FlagZero, v == 0)
 	cpu.setFlag(FlagNegative, v&0x80 == 0x80)
 }
 
-func (cpu *Cpu2A03) flagsN(v byte) {
+func (cpu *CPU) flagsN(v byte) {
 	cpu.setFlag(FlagNegative, v&0x80 == 0x80)
 }
 
-func (cpu *Cpu2A03) flagsZ(v byte) {
+func (cpu *CPU) flagsZ(v byte) {
 	cpu.setFlag(FlagZero, v == 0)
 }
 
-func (cpu *Cpu2A03) setFlag(flag byte, v bool) {
+func (cpu *CPU) setFlag(flag byte, v bool) {
 	if v {
 		cpu.P |= flag
 	} else {
@@ -60,11 +60,11 @@ func (cpu *Cpu2A03) setFlag(flag byte, v bool) {
 	}
 }
 
-func (cpu *Cpu2A03) getFlag(flag byte) bool {
+func (cpu *CPU) getFlag(flag byte) bool {
 	return cpu.P&flag == flag
 }
 
-func (cpu *Cpu2A03) compare(a, b byte) {
+func (cpu *CPU) compare(a, b byte) {
 	cpu.flagsNZ(a - b)
 	cpu.setFlag(FlagCarry, a >= b)
 }

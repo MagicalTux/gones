@@ -1,13 +1,13 @@
-package cpu2a03
+package cpu6502
 
 type op struct {
 	i   string
-	f   func(cpu *Cpu2A03, am AddressMode)
+	f   func(cpu *CPU, am AddressMode)
 	am  AddressMode
 	cyc byte // number of cycles for operation itself (addressmode may have something too)
 }
 
-var cpu2a03op = [256]*op{
+var cpu6502op = [256]*op{
 	// 0x00
 	&op{"BRK", brk, amImmed, 7}, // actually amImpl, but makes more sense like that
 	&op{"ORA", ora, amIndX, 6},
