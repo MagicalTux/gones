@@ -1,16 +1,16 @@
 package pkgnes
 
 import (
+	"github.com/MagicalTux/gones/clock"
 	"github.com/MagicalTux/gones/cpu6502"
 	"github.com/MagicalTux/gones/memory"
 	"github.com/MagicalTux/gones/nesapu"
-	"github.com/MagicalTux/gones/nesclock"
 	"github.com/MagicalTux/gones/nesppu"
 )
 
 type NES struct {
 	Memory memory.Master
-	Clk    *nesclock.Master
+	Clk    *clock.Master
 	CPU    *cpu6502.CPU
 	PPU    *nesppu.PPU
 	APU    *nesapu.APU

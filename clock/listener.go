@@ -1,4 +1,4 @@
-package nesclock
+package clock
 
 type Listener struct {
 	next    *Listener

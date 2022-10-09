@@ -1,6 +1,6 @@
 package pkgnes
 
-import "github.com/MagicalTux/gones/nesclock"
+import "github.com/MagicalTux/gones/clock"
 
 type Model byte
 
@@ -19,12 +19,12 @@ const (
 // Clock: requested 26601700 Hz clock, computed clock will be 26601723 Hz (71 steps/2.669µs interval, a 23Hz diff)
 )
 
-func (m Model) newClock() *nesclock.Master {
+func (m Model) newClock() *clock.Master {
 	switch m {
 	case NTSC:
-		return nesclock.New(FreqNTSC)
+		return clock.New(FreqNTSC)
 	case PAL:
-		return nesclock.New(FreqPAL)
+		return clock.New(FreqPAL)
 	default:
 		panic("invalid model")
 	}

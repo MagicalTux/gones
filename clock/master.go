@@ -1,4 +1,4 @@
-package nesclock
+package clock
 
 import (
 	"log"
