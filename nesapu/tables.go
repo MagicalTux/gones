@@ -1,4 +1,4 @@
-package apu
+package nesapu
 
 var lengthTable = []byte{
 	10, 254, 20, 2, 40, 4, 80, 6, 160, 8, 60, 10, 14, 12, 26, 14,

@@ -6,8 +6,8 @@ import (
 	"unsafe"
 
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/nesppu"
 	"github.com/MagicalTux/gones/pkgnes"
-	"github.com/MagicalTux/gones/ppu"
 )
 
 func init() {
@@ -23,7 +23,7 @@ func init() {
 // https://www.nesdev.org/wiki/MMC1
 type MMC1 struct {
 	data *Data
-	ppu  *ppu.PPU
+	ppu  *nesppu.PPU
 
 	in byte
 
@@ -176,13 +176,13 @@ func (m *MMC1) MemWrite(offset uint16, v byte) byte {
 		log.Printf("MMC1: Set mirror mode=%d prgMode=%d chrMode=%d", mirrorMode, m.prgMode, m.chrMode)
 		switch mirrorMode {
 		case 0:
-			m.ppu.SetMirroring(ppu.SingleScreenMirroring)
+			m.ppu.SetMirroring(nesppu.SingleScreenMirroring)
 		case 1:
-			m.ppu.SetMirroring(ppu.SingleScreen2Mirroring)
+			m.ppu.SetMirroring(nesppu.SingleScreen2Mirroring)
 		case 2:
-			m.ppu.SetMirroring(ppu.VerticalMirroring)
+			m.ppu.SetMirroring(nesppu.VerticalMirroring)
 		case 3:
-			m.ppu.SetMirroring(ppu.HorizontalMirroring)
+			m.ppu.SetMirroring(nesppu.HorizontalMirroring)
 		}
 		m.updateBanks()
 		return 0

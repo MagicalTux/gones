@@ -1,4 +1,4 @@
-package apu
+package nesapu
 
 // InputDvice is a generic device connected to either port of the NES
 // Typically a controller, but can be other stuff

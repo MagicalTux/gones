@@ -1,4 +1,4 @@
-package ppu
+package nesppu
 
 func (p *PPU) triggerRender() {
 	preLine := p.scanline == 261

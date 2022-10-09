@@ -1,4 +1,4 @@
-package ppu
+package nesppu
 
 import "image/color"
 

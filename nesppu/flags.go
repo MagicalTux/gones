@@ -1,4 +1,4 @@
-package ppu
+package nesppu
 
 const (
 	// STATUS

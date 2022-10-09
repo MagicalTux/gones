@@ -1,4 +1,4 @@
-package apu
+package nesapu
 
 type Triangle struct {
 	enabled       bool

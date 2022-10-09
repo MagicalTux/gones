@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/nesppu"
 	"github.com/MagicalTux/gones/pkgnes"
-	"github.com/MagicalTux/gones/ppu"
 )
 
 type Data struct {
@@ -75,13 +75,13 @@ func (d *Data) Setup(nes *pkgnes.NES) error {
 	// see https://www.nesdev.org/wiki/Mirroring#Nametable_Mirroring
 	if d.ignoreMirroring {
 		// Ignore mirroring control or above mirroring bit; instead provide four-screen VRAM
-		nes.PPU.SetMirroring(ppu.FourScreenMirroring)
+		nes.PPU.SetMirroring(nesppu.FourScreenMirroring)
 	} else if d.hasMirroring {
 		// 1: vertical (horizontal arrangement) (CIRAM A10 = PPU A10)
-		nes.PPU.SetMirroring(ppu.VerticalMirroring)
+		nes.PPU.SetMirroring(nesppu.VerticalMirroring)
 	} else {
 		// 0: horizontal (vertical arrangement) (CIRAM A10 = PPU A11)
-		nes.PPU.SetMirroring(ppu.HorizontalMirroring)
+		nes.PPU.SetMirroring(nesppu.HorizontalMirroring)
 	}
 	return nil
 }

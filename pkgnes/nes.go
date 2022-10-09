@@ -1,20 +1,20 @@
 package pkgnes
 
 import (
-	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/cpu6502"
 	"github.com/MagicalTux/gones/memory"
+	"github.com/MagicalTux/gones/nesapu"
 	"github.com/MagicalTux/gones/nesclock"
-	"github.com/MagicalTux/gones/ppu"
+	"github.com/MagicalTux/gones/nesppu"
 )
 
 type NES struct {
 	Memory memory.Master
 	Clk    *nesclock.Master
 	CPU    *cpu6502.CPU
-	PPU    *ppu.PPU
-	APU    *apu.APU
-	Input  []apu.InputDevice
+	PPU    *nesppu.PPU
+	APU    *nesapu.APU
+	Input  []nesapu.InputDevice
 	model  Model
 }
 
@@ -23,12 +23,12 @@ func New(model Model) *NES {
 		Memory: memory.NewBus(),
 		Clk:    model.newClock(),
 		CPU:    cpu6502.New(),
-		PPU:    ppu.New(),
+		PPU:    nesppu.New(),
 	}
 	nes.CPU.Memory = nes.Memory              // connect main memory bus to CPU
 	nes.PPU.VBlankInterrupt = nes.CPU.SetNMI // connect PPU's vblank to NMI
 
-	nes.APU = apu.New(nes.Memory, nes.CPU.TimeFreeze) // APU has access to the cpu's memory & clock
+	nes.APU = nesapu.New(nes.Memory, nes.CPU.TimeFreeze) // APU has access to the cpu's memory & clock
 	nes.Input = nes.APU.Input[:]
 	nes.APU.Interrupt = nes.CPU.IRQ
 

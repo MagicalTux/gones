@@ -1,4 +1,4 @@
-package apu
+package nesapu
 
 import (
 	"encoding/binary"

@@ -1,4 +1,4 @@
-package ppu
+package nesppu
 
 func (p *PPU) evaluateSprites() {
 	var h int

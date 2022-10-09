@@ -1,4 +1,4 @@
-package apu
+package nesapu
 
 type Noise struct {
 	enabled         bool

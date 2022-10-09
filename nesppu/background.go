@@ -1,4 +1,4 @@
-package ppu
+package nesppu
 
 func (p *PPU) fetchTileData() uint32 {
 	return uint32(p.tileData >> 32)

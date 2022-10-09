@@ -7,8 +7,8 @@ import (
 	"os"
 	"runtime/pprof"
 
-	"github.com/MagicalTux/gones/apu"
 	"github.com/MagicalTux/gones/cartridge"
+	"github.com/MagicalTux/gones/nesapu"
 	"github.com/MagicalTux/gones/nesinput"
 	"github.com/MagicalTux/gones/pkgnes"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -45,8 +45,8 @@ func (g *Game) Update() error {
 		if player, err := snd.NewPlayer(g.nes.APU); err != nil {
 			log.Printf("failed to create player: %s", err)
 		} else {
-			log.Printf("Audio: setting buffer length to %s", apu.BufferLength())
-			player.SetBufferSize(apu.BufferLength())
+			log.Printf("Audio: setting buffer length to %s", nesapu.BufferLength())
+			player.SetBufferSize(nesapu.BufferLength())
 			player.Play()
 		}
 	}
