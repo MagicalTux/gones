@@ -1,4 +1,4 @@
-package cartridge
+package nescartridge
 
 import (
 	"github.com/MagicalTux/gones/memory"

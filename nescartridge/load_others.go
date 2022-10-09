@@ -1,6 +1,6 @@
 //go:build !unix
 
-package cartridge
+package nescartridge
 
 import "io/ioutil"
 

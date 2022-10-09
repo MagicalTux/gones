@@ -7,8 +7,8 @@ import (
 	"os"
 	"runtime/pprof"
 
-	"github.com/MagicalTux/gones/cartridge"
 	"github.com/MagicalTux/gones/nesapu"
+	"github.com/MagicalTux/gones/nescartridge"
 	"github.com/MagicalTux/gones/nesinput"
 	"github.com/MagicalTux/gones/pkgnes"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -104,14 +104,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	data, err := cartridge.Load(arg[0])
-	if err != nil {
-		log.Printf("Failed to load %s: %s", arg[0], err)
-		os.Exit(1)
-	}
-
+	var err error
 	nes := pkgnes.New(pkgnes.NTSC)
-
 	nes.Input[0] = nesinput.NewKeyboard()
 
 	if *cputrace != "" {
@@ -142,6 +136,13 @@ func main() {
 				os.Exit(1)
 			}
 		}
+	}
+
+	// load cartridge
+	data, err := nescartridge.Load(arg[0])
+	if err != nil {
+		log.Printf("Failed to load %s: %s", arg[0], err)
+		os.Exit(1)
 	}
 
 	err = data.Setup(nes)

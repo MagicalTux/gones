@@ -1,4 +1,4 @@
-package cartridge
+package nescartridge
 
 import (
 	"io"
