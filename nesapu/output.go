@@ -34,7 +34,7 @@ func (apu *APU) sendSample() {
 		if !apu.overrunWarning {
 			log.Printf("WARNING: buffer overrun, emptying half...")
 			apu.overrunWarning = true
-			ln := len(apu.channel) / 2
+			ln := cap(apu.channel) / 2
 			for i := 0; i < ln; i += 1 {
 				select {
 				case <-apu.channel:
