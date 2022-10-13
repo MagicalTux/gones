@@ -180,5 +180,5 @@ func (cpu *CPU) Read16W(offt uint16) uint16 {
 }
 
 func (cpu *CPU) String() string {
-	return fmt.Sprintf("CPU:2A03 [A=%02x X=%02x Y=%02x PC=%04x S=%02x P=%02x]", cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.S, cpu.P)
+	return fmt.Sprintf("CPU:6502 [A=%02x X=%02x Y=%02x PC=%04x S=%02x P=%02x]", cpu.A, cpu.X, cpu.Y, cpu.PC, cpu.S, cpu.P)
 }
